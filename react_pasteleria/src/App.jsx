@@ -4,7 +4,7 @@ import ProductCard from './components/ProductCard'
 function App() {
   return (
     <Container className="mt-4">
-      <h1>Pastelería</h1>
+      <h1>Catalogo</h1>
       <ProductCard nombre="Torta de chocolate" precio={18990} />
       <ProductCard nombre="Cheesecake de frambuesa" precio={16990} />
     </Container>
