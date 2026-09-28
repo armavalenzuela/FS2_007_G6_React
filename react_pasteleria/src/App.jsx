@@ -1,7 +1,5 @@
 import { Container } from 'react-bootstrap'
-import AppNavbar from './components/organisms/AppNavbar'
-import ProductList from './components/organisms/ProductList'
-import ShoppingCart from './components/organisms/ShoppingCart'
+import AppNavbar from './components/organisms/Navbar'
 import productos from './data/productos'
 
 function App() {
