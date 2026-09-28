@@ -1,13 +1,19 @@
 import { Container } from 'react-bootstrap'
-import ProductCard from './components/ProductCard'
+import AppNavbar from './components/organisms/AppNavbar'
+import ProductList from './components/organisms/ProductList'
+import ShoppingCart from './components/organisms/ShoppingCart'
+import productos from './data/productos'
 
 function App() {
   return (
-    <Container className="mt-4">
-      <h1>Catalogo</h1>
-      <ProductCard nombre="Torta de chocolate" precio={18990} />
-      <ProductCard nombre="Cheesecake de frambuesa" precio={16990} />
-    </Container>
+    <>
+      <AppNavbar />
+      <Container className="my-4">
+        <h1>Nuestros productos</h1>
+        <ShoppingCart cantidad={0} />
+        <ProductList productos={productos} />
+      </Container>
+    </>
   )
 }
 
