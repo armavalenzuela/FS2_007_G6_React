@@ -36,8 +36,8 @@ export function AuthProvider({ children }) {
       return { ok: false, error: 'Completa todos los campos obligatorios.' }
     }
 
-    if (password.length < 4) {
-      return { ok: false, error: 'La contraseña debe tener al menos 4 caracteres.' }
+    if (password.length < 4 || password.length > 10) {
+      return { ok: false, error: 'La contraseña debe tener entre 4 y 10 caracteres.' }
     }
 
     const codigo = (codigoDescuento || '').trim().toUpperCase()
@@ -63,11 +63,11 @@ export function AuthProvider({ children }) {
   }
 
   function iniciarSesion(email, password) {
-    const emailLimpio = (email || '').trim().toLowerCase()
-    const usuario = usuarios.find((u) => u.email === emailLimpio && u.password === password)
-    if (!usuario) return { ok: false, error: 'Correo o contraseña incorrectos.' }
-    setUsuarioActual(usuario)
-    return { ok: true, usuario }
+  const emailLimpio = (email || '').trim().toLowerCase()
+  const usuario = usuarios.find((u) => u.email === emailLimpio && u.password === password)
+  if (!usuario) return { ok: false, error: 'Correo o contraseña incorrectos.' }
+  setUsuarioActual(usuario)
+  return { ok: true, usuario }
   }
 
   function cerrarSesion() {

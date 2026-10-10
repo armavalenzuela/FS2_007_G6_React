@@ -61,14 +61,15 @@ function Registro() {
             <Form onSubmit={manejarSubmit}>
               <Form.Group className="mb-3">
                 <Form.Label htmlFor="reg-nombre">Nombre completo</Form.Label>
-                <Form.Control
-                  id="reg-nombre"
-                  type="text"
-                  value={form.nombre}
-                  onChange={(e) => actualizarCampo('nombre', e.target.value)}
-                  placeholder="Ej: María Pérez"
-                  required
-                />
+               <Form.Control
+                id="reg-nombre"
+                type="text"
+                value={form.nombre}
+                onChange={(e) => { e.target.setCustomValidity(''); actualizarCampo('nombre', e.target.value) }}
+                onInvalid={(e) => e.target.setCustomValidity('Ingresa tu nombre completo')}
+                placeholder="Ej: María Pérez"
+                required
+              />
               </Form.Group>
 
               <Form.Group className="mb-3">
@@ -77,7 +78,8 @@ function Registro() {
                   id="reg-email"
                   type="email"
                   value={form.email}
-                  onChange={(e) => actualizarCampo('email', e.target.value)}
+                  onChange={(e) => {e.target.setCustomValidity(e.target.validity.typeMismatch ? 'Por favor ingresa un correo válido' : ''); actualizarCampo('email', e.target.value)}}
+                  onInvalid={(e) => e.target.setCustomValidity('Por favor ingresa un correo válido')}
                   placeholder="tucorreo@ejemplo.com"
                   required
                 />
@@ -95,7 +97,11 @@ function Registro() {
                       id="reg-password"
                       type="password"
                       value={form.password}
-                      onChange={(e) => actualizarCampo('password', e.target.value)}
+                      onChange={(e) => {
+                      const valor = e.target.value
+                      const invalida = valor.length > 0 && (valor.length < 4 || valor.length > 10)
+                      e.target.setCustomValidity(invalida ? 'Ingresa una contraseña de min 4 y max 10 caracteres' : '')
+                      actualizarCampo('password', valor)}}
                       placeholder="Mínimo 4 caracteres"
                       required
                     />
@@ -108,7 +114,10 @@ function Registro() {
                       id="reg-fecha"
                       type="date"
                       value={form.fechaNacimiento}
-                      onChange={(e) => actualizarCampo('fechaNacimiento', e.target.value)}
+                      onChange={(e) => {
+                      const valor = e.target.value
+                      e.target.setCustomValidity(valor ? '' : 'Ingresa tu fecha de nacimiento')
+                      actualizarCampo('fechaNacimiento', valor)}}  
                       required
                     />
                     <Form.Text className="text-muted">

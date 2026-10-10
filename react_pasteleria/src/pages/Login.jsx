@@ -3,6 +3,19 @@ import { Container, Form, Button, Alert, Row, Col } from 'react-bootstrap'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 
+const regexCorreo = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
+function mensajeCorreo(valor) {
+  if (!valor.trim()) return 'Ingresa tu correo electrónico.'
+  if (!regexCorreo.test(valor.trim())) return 'Ingresa un correo válido, por ejemplo: nombre@correo.com'
+  return ''
+}
+
+function mensajePassword(valor) {
+  if (!valor) return 'Ingresa tu contraseña.'
+  return ''
+}
+
 function Login() {
   const { iniciarSesion } = useAuth()
   const navigate = useNavigate()
@@ -30,7 +43,7 @@ function Login() {
     <Container className="my-5">
       <Row className="justify-content-center">
         <Col md={6} lg={5}>
-          <div className="border rounded p-4 bg-light">
+          <div className="border rounded p-4 seccion-alterna">
             <h1 className="text-center mb-2">Iniciar sesión</h1>
             <p className="text-muted text-center mb-4">
               Accede para disfrutar de tus descuentos y seguimiento de pedidos
@@ -38,14 +51,18 @@ function Login() {
 
             {error && <Alert variant="danger">{error}</Alert>}
 
-            <Form onSubmit={manejarSubmit}>
+            <Form className="form-mil-sabores" onSubmit={manejarSubmit}>
               <Form.Group className="mb-3">
                 <Form.Label htmlFor="login-email">Correo electrónico</Form.Label>
                 <Form.Control
                   id="login-email"
                   type="email"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => {
+                    e.target.setCustomValidity(mensajeCorreo(e.target.value))
+                    setEmail(e.target.value)
+                  }}
+                  onInvalid={(e) => e.target.setCustomValidity(mensajeCorreo(e.target.value))}
                   placeholder="tucorreo@ejemplo.com"
                   required
                 />
@@ -57,17 +74,21 @@ function Login() {
                   id="login-password"
                   type="password"
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={(e) => {
+                    e.target.setCustomValidity(mensajePassword(e.target.value))
+                    setPassword(e.target.value)
+                  }}
+                  onInvalid={(e) => e.target.setCustomValidity(mensajePassword(e.target.value))}
                   placeholder="Tu contraseña"
                   required
                 />
               </Form.Group>
 
               <div className="d-grid gap-2">
-                <Button type="submit" variant="dark" size="lg">
+                <Button className="btn-mil-sabores" type="submit" size="lg">
                   Entrar
                 </Button>
-                <Button as={Link} to="/registro" variant="outline-dark">
+                <Button className="btn-outline-mil-sabores" as={Link} to="/registro">
                   ¿No tienes cuenta? Regístrate
                 </Button>
               </div>
