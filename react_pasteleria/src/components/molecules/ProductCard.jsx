@@ -17,7 +17,7 @@ function ProductCard({ id, nombre, precio, imagen, categoria, tamañoBase }) {
   }
 
   return (
-    <Card className="h-100">
+    <Card className="h-100 card-producto">
       {imagen && <Card.Img variant="top" src={imagen} alt={nombre} />}
       <Card.Body className="d-flex flex-column">
         <Card.Title>{nombre}</Card.Title>

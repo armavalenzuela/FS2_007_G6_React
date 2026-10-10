@@ -1,0 +1,40 @@
+/* Colores y fuentes de tipografia para uso de todas las paginas */
+:root {
+  --color-fondo: #FFF5E1;  
+  --color-rosa: #FFC0CB;       /* fondos pequeños/botones */
+  --color-chocolate: #8B4513;  /* botones/bordes varios*/
+  --color-texto: #5D4037;      /* texto principal */
+  --color-texto-secundario: #242627; /* texto secundario */
+  --color-borde: #e8d9c3; 
+  --font-titulos: 'Pacifico';
+  --font-texto: 'Lato', sans-serif;
+}
+
+
+/*Tipografia basica para utilizar */
+body {
+  font-family: var(--font-texto);
+  background-color: var(--color-fondo);
+  color: var(--color-texto);
+  line-height: 1.4;
+}
+
+/*Tipografia de encabezados */
+h1, h2, h3, .titulo-cursivo {
+  font-family: var(--font-titulos);
+  color: var(--color-chocolate);
+  font-weight: 400;
+}
+
+h4, h5, h6 { 
+  font-family: var(--font-texto); 
+  color: var(--color-texto); 
+  font-weight: 700; 
+}
+
+p, li, span, label, small { 
+  color: var(--color-texto); }
+.texto-secundario { color: var(--color-texto-secundario); }
+
+a { color: var(--color-chocolate); }
+a:hover { color: var(--color-texto); }

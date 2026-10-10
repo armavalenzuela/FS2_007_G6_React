@@ -2,7 +2,7 @@ import { Navbar, Nav, Container } from 'react-bootstrap'
 
 function NavBar() {
   return (
-    <Navbar bg="dark" data-bs-theme="dark" expand="md">
+    <Navbar expand="md" className="navbar-mil-sabores">
       <Container>
         <Navbar.Brand href="/">Pastelería</Navbar.Brand>
         <Navbar.Toggle aria-controls="menu-principal" />
