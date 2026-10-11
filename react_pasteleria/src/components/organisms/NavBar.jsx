@@ -1,25 +1,85 @@
-import { Navbar, Nav, Container } from 'react-bootstrap'
+import { useState } from "react";
+import { NavLink, Link, useNavigate } from "react-router-dom";
+import { useSesion } from "../context/SesionContext.jsx";
+import { useCarrito } from "../context/CarritoContext.jsx";
 
-function NavBar() {
+const ENLACES = [
+  { ruta: "/", texto: "Inicio", fin: true },
+  { ruta: "/catalogo", texto: "Catálogo" },
+  { ruta: "/ofertas", texto: "Ofertas" },
+  { ruta: "/nosotros", texto: "Nosotros" },
+  { ruta: "/blog", texto: "Blog" },
+  { ruta: "/contacto", texto: "Contacto" },
+];
+
+export default function Navbar() {
+  const { usuario, cerrarSesion } = useSesion();
+  const { cantidadTotal } = useCarrito();
+  const navegar = useNavigate();
+  const [menuAbierto, setMenuAbierto] = useState(false);
+
+  function salir() {
+    cerrarSesion();
+    navegar("/login");
+  }
+
+  const esAdmin = usuario && (usuario.tipo === "administrador" || usuario.tipo === "vendedor");
+
   return (
-    <Navbar expand="md" className="navbar-mil-sabores">
-      <Container>
-        <Navbar.Brand href="/">Pastelería</Navbar.Brand>
-        <Navbar.Toggle aria-controls="menu-principal" />
-        <Navbar.Collapse id="menu-principal">
-          <Nav className="ms-auto">
-            <Nav.Link href="/">Inicio</Nav.Link>
-            <Nav.Link href="/catalogo">Catálogo</Nav.Link>
-            <Nav.Link href="/carrito">Carrito</Nav.Link>
-            <Nav.Link href="/pedidos">Mis pedidos</Nav.Link>
-            <Nav.Link href="/perfil">Mi perfil</Nav.Link>
-            <Nav.Link href="/registro">Registro</Nav.Link>
-            <Nav.Link href="/login">Login</Nav.Link>
-          </Nav>
-        </Navbar.Collapse>
-      </Container>
-    </Navbar>
-  )
-}
+    <nav className="navbar navbar-expand-lg navbar-mil-sabores sticky-top">
+      <div className="container">
+        <Link className="navbar-brand" to="/">Mil Sabores</Link>
+        <button className="navbar-toggler" type="button" aria-controls="navMenu"
+          aria-expanded={menuAbierto} onClick={() => setMenuAbierto(!menuAbierto)}>
+          <span className="navbar-toggler-icon"></span>
+        </button>
 
-export default NavBar
+        <div className={`collapse navbar-collapse ${menuAbierto ? "show" : ""}`} id="navMenu">
+          <ul className="navbar-nav ms-auto align-items-lg-center">
+            {ENLACES.map((enlace) => (
+              <li className="nav-item" key={enlace.ruta}>
+                <NavLink className="nav-link" to={enlace.ruta} end={enlace.fin} onClick={() => setMenuAbierto(false)}>
+                  {enlace.texto}
+                </NavLink>
+              </li>
+            ))}
+            {esAdmin && (
+              <li className="nav-item">
+                <NavLink className="nav-link" to="/admin" onClick={() => setMenuAbierto(false)}>Administración</NavLink>
+              </li>
+            )}
+            {usuario ? (
+              <>
+                <li className="nav-item">
+                  <NavLink className="nav-link" to="/mi-cuenta" onClick={() => setMenuAbierto(false)}>Mi cuenta</NavLink>
+                </li>
+                <li className="nav-item">
+                  <button className="btn btn-link nav-link" onClick={salir}>Cerrar sesión</button>
+                </li>
+              </>
+            ) : (
+              <>
+                <li className="nav-item">
+                  <NavLink className="nav-link" to="/login" onClick={() => setMenuAbierto(false)}>Iniciar sesión</NavLink>
+                </li>
+                <li className="nav-item">
+                  <NavLink className="btn btn-mil-sabores btn-sm ms-lg-2" to="/registro" onClick={() => setMenuAbierto(false)}>
+                    Crear cuenta
+                  </NavLink>
+                </li>
+              </>
+            )}
+            <li className="nav-item">
+              <NavLink className="nav-link position-relative" to="/carrito" onClick={() => setMenuAbierto(false)}>
+                Carrito
+                <span className="badge rounded-pill badge-carrito position-absolute top-0 start-100 translate-middle">
+                  {cantidadTotal}
+                </span>
+              </NavLink>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+  );
+}

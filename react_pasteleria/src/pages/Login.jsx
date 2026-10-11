@@ -1,103 +1,71 @@
-import { useState } from 'react'
-import { Container, Form, Button, Alert, Row, Col } from 'react-bootstrap'
-import { Link, useNavigate, useSearchParams } from 'react-router-dom'
-import { useAuth } from '../context/AuthContext'
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useSesion } from "../context/SesionContext.jsx";
+import { validarLogin } from "../utils/validaciones.js";
 
-const regexCorreo = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+// Destino según el tipo de usuario, redireccionado después de iniciar sesion
+const DESTINOS = { administrador: "/admin", vendedor: "/admin/productos", cliente: "/mi-cuenta" };
 
-function mensajeCorreo(valor) {
-  if (!valor.trim()) return 'Ingresa tu correo electrónico.'
-  if (!regexCorreo.test(valor.trim())) return 'Ingresa un correo válido, por ejemplo: nombre@correo.com'
-  return ''
-}
+export default function Login() {
+  const { login } = useSesion();
+  const navegar = useNavigate();
+  const [form, setForm] = useState({ correo: "", contrasena: "" });
+  const [errores, setErrores] = useState({});
+  const [errorGeneral, setErrorGeneral] = useState("");
 
-function mensajePassword(valor) {
-  if (!valor) return 'Ingresa tu contraseña.'
-  return ''
-}
+  function enviar(e) {
+    e.preventDefault();
+    const nuevosErrores = validarLogin(form);
+    setErrores(nuevosErrores);
+    setErrorGeneral("");
+    if (Object.keys(nuevosErrores).length > 0) return;
 
-function Login() {
-  const { iniciarSesion } = useAuth()
-  const navigate = useNavigate()
-  const [searchParams] = useSearchParams()
-  const redirect = searchParams.get('redirect') || '/'
-
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [error, setError] = useState('')
-
-  function manejarSubmit(e) {
-    e.preventDefault()
-    setError('')
-
-    const resultado = iniciarSesion(email, password)
-    if (!resultado.ok) {
-      setError(resultado.error)
-      return
+    const usuario = login(form.correo, form.contrasena);
+    if (!usuario) {
+      setErrorGeneral("Correo o contraseña incorrectos.");
+      return;
     }
-
-    navigate(redirect)
+    navegar(DESTINOS[usuario.tipo] || "/mi-cuenta");
   }
 
   return (
-    <Container className="my-5">
-      <Row className="justify-content-center">
-        <Col md={6} lg={5}>
-          <div className="border rounded p-4 seccion-alterna">
-            <h1 className="text-center mb-2">Iniciar sesión</h1>
-            <p className="text-muted text-center mb-4">
-              Accede para disfrutar de tus descuentos y seguimiento de pedidos
-            </p>
-
-            {error && <Alert variant="danger">{error}</Alert>}
-
-            <Form className="form-mil-sabores" onSubmit={manejarSubmit}>
-              <Form.Group className="mb-3">
-                <Form.Label htmlFor="login-email">Correo electrónico</Form.Label>
-                <Form.Control
-                  id="login-email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => {
-                    e.target.setCustomValidity(mensajeCorreo(e.target.value))
-                    setEmail(e.target.value)
-                  }}
-                  onInvalid={(e) => e.target.setCustomValidity(mensajeCorreo(e.target.value))}
-                  placeholder="tucorreo@ejemplo.com"
-                  required
-                />
-              </Form.Group>
-
-              <Form.Group className="mb-4">
-                <Form.Label htmlFor="login-password">Contraseña</Form.Label>
-                <Form.Control
-                  id="login-password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => {
-                    e.target.setCustomValidity(mensajePassword(e.target.value))
-                    setPassword(e.target.value)
-                  }}
-                  onInvalid={(e) => e.target.setCustomValidity(mensajePassword(e.target.value))}
-                  placeholder="Tu contraseña"
-                  required
-                />
-              </Form.Group>
-
-              <div className="d-grid gap-2">
-                <Button className="btn-mil-sabores" type="submit" size="lg">
-                  Entrar
-                </Button>
-                <Button className="btn-outline-mil-sabores" as={Link} to="/registro">
-                  ¿No tienes cuenta? Regístrate
-                </Button>
-              </div>
-            </Form>
+    <>
+      <header className="hero-mil-sabores text-center">
+        <div className="container">
+          <h1>Inicia sesión</h1>
+          <p className="fs-5 mx-auto" style={{ maxWidth: 600 }}>Ingresa a tu cuenta para ver tus descuentos, tu historial de pedidos y seguir el estado de tus tortas.</p>
+        </div>
+      </header>
+      <section className="seccion">
+        <div className="container">
+          <div className="row justify-content-center">
+            <div className="col-lg-5 col-md-7">
+              <article className="card-producto p-4 p-md-5 sombra-suave">
+                <form className="form-mil-sabores" onSubmit={enviar} noValidate>
+                  <div className="mb-3">
+                    <label htmlFor="loginCorreo" className="form-label">Correo electrónico</label>
+                    <input id="loginCorreo" type="email" className={`form-control ${errores.correo ? "is-invalid" : ""}`}
+                      placeholder="tucorreo@ejemplo.com" value={form.correo}
+                      onChange={(e) => setForm({ ...form, correo: e.target.value })} />
+                    <div className="invalid-feedback">{errores.correo}</div>
+                  </div>
+                  <div className="mb-3">
+                    <label htmlFor="loginPassword" className="form-label">Contraseña</label>
+                    <input id="loginPassword" type="password" className={`form-control ${errores.contrasena ? "is-invalid" : ""}`}
+                      value={form.contrasena} onChange={(e) => setForm({ ...form, contrasena: e.target.value })} />
+                    <div className="invalid-feedback">{errores.contrasena}</div>
+                  </div>
+                  {errorGeneral && <div className="alert alert-danger small py-2">{errorGeneral}</div>}
+                  <button type="submit" className="btn btn-mil-sabores btn-lg w-100">Iniciar sesión</button>
+                  <p className="text-center small mt-3 mb-0">
+                    ¿Aún no tienes cuenta? <Link to="/registro">Regístrate aquí</Link>
+                  </p>
+                </form>
+              </article>
+            </div>
           </div>
-        </Col>
-      </Row>
-    </Container>
-  )
+        </div>
+      </section>
+    </>
+  );
 }
-
-export default Login

@@ -1,212 +1,134 @@
-const productos = [
-  {
-    id: 'TC001',
-    categoria: 'Tortas cuadradas',
-    categoriaId: 'tortas-cuadradas',
-    nombre: 'Torta cuadrada de chocolate',
-    precio: 45000,
-    descripcion:
-      'Deliciosa torta de chocolate con capas de ganache y un toque de avellanas. Personalizable con mensajes especiales.',
-    tipo: 'cuadrada',
-    tamañoBase: 'Mediano',
-    personalizable: true,
-    destacado: true,
-  },
-  {
-    id: 'TC002',
-    categoria: 'Tortas cuadradas',
-    categoriaId: 'tortas-cuadradas',
-    nombre: 'Torta cuadrada de frutas',
-    precio: 50000,
-    descripcion:
-      'Una mezcla de frutas frescas y crema chantilly sobre un suave bizcocho de vainilla, ideal para celebraciones.',
-    tipo: 'cuadrada',
-    tamañoBase: 'Mediano',
-    personalizable: true,
-    destacado: true,
-  },
-  {
-    id: 'TT001',
-    categoria: 'Tortas circulares',
-    categoriaId: 'tortas-circulares',
-    nombre: 'Torta circular de vainilla',
-    precio: 40000,
-    descripcion:
-      'Bizcocho de vainilla clásico relleno con crema pastelera y cubierto con un glaseado dulce, perfecto para cualquier ocasión.',
-    tipo: 'circular',
-    tamañoBase: 'Mediano',
-    personalizable: true,
-    destacado: true,
-  },
-  {
-    id: 'TT002',
-    categoria: 'Tortas circulares',
-    categoriaId: 'tortas-circulares',
-    nombre: 'Torta circular de manjar',
-    precio: 42000,
-    descripcion:
-      'Torta tradicional chilena con manjar y nueces, un deleite para los amantes de los sabores dulces y clásicos.',
-    tipo: 'circular',
-    tamañoBase: 'Mediano',
-    personalizable: true,
-    destacado: true,
-  },
-  {
-    id: 'PI001',
-    categoria: 'Postres individuales',
-    categoriaId: 'postres-individuales',
-    nombre: 'Mousse de chocolate',
-    precio: 5000,
-    descripcion:
-      'Postre individual cremoso y suave, hecho con chocolate de alta calidad, ideal para los amantes del chocolate.',
-    tipo: null,
-    tamañoBase: 'Individual',
-    personalizable: false,
-    destacado: false,
-  },
-  {
-    id: 'PI002',
-    categoria: 'Postres individuales',
-    categoriaId: 'postres-individuales',
-    nombre: 'Tiramisú clásico',
-    precio: 5500,
-    descripcion:
-      'Un postre italiano individual con capas de café, mascarpone y cacao, perfecto para finalizar cualquier comida.',
-    tipo: null,
-    tamañoBase: 'Individual',
-    personalizable: false,
-    destacado: false,
-  },
-  {
-    id: 'PSA001',
-    categoria: 'Productos sin azúcar',
-    categoriaId: 'sin-azucar',
-    nombre: 'Torta sin azúcar de naranja',
-    precio: 48000,
-    descripcion:
-      'Torta ligera y deliciosa, endulzada naturalmente, ideal para quienes buscan opciones más saludables.',
-    tipo: null,
-    tamañoBase: 'Mediano',
-    personalizable: true,
-    destacado: false,
-  },
-  {
-    id: 'PSA002',
-    categoria: 'Productos sin azúcar',
-    categoriaId: 'sin-azucar',
-    nombre: 'Cheesecake sin azúcar',
-    precio: 47000,
-    descripcion:
-      'Suave y cremoso, este cheesecake es una opción perfecta para disfrutar sin culpa.',
-    tipo: null,
-    tamañoBase: 'Mediano',
-    personalizable: false,
-    destacado: false,
-  },
-  {
-    id: 'PT001',
-    categoria: 'Pastelería tradicional',
-    categoriaId: 'pasteleria-tradicional',
-    nombre: 'Empanada de manzana',
-    precio: 3000,
-    descripcion:
-      'Pastelería tradicional rellena de manzanas especiadas, perfecta para un dulce desayuno o merienda.',
-    tipo: null,
-    tamañoBase: 'Unidad',
-    personalizable: false,
-    destacado: false,
-  },
-  {
-    id: 'PT002',
-    categoria: 'Pastelería tradicional',
-    categoriaId: 'pasteleria-tradicional',
-    nombre: 'Tarta de santiago',
-    precio: 6000,
-    descripcion:
-      'Tradicional tarta española hecha con almendras, azúcar, y huevos, una delicia para los amantes de los postres clásicos.',
-    tipo: null,
-    tamañoBase: 'Unidad',
-    personalizable: false,
-    destacado: false,
-  },
-  {
-    id: 'PG001',
-    categoria: 'Productos sin gluten',
-    categoriaId: 'sin-gluten',
-    nombre: 'Brownie sin gluten',
-    precio: 4000,
-    descripcion:
-      'Rico y denso, este brownie es perfecto para quienes necesitan evitar el gluten sin sacrificar el sabor.',
-    tipo: null,
-    tamañoBase: 'Unidad',
-    personalizable: false,
-    destacado: false,
-  },
-  {
-    id: 'PG002',
-    categoria: 'Productos sin gluten',
-    categoriaId: 'sin-gluten',
-    nombre: 'Pan sin gluten',
-    precio: 3500,
-    descripcion:
-      'Suave y esponjoso, ideal para sándwiches o para acompañar cualquier comida.',
-    tipo: null,
-    tamañoBase: 'Unidad',
-    personalizable: false,
-    destacado: false,
-  },
-  {
-    id: 'PV001',
-    categoria: 'Productos vegana',
-    categoriaId: 'vegana',
-    nombre: 'Torta vegana de chocolate',
-    precio: 50000,
-    descripcion:
-      'Torta de chocolate húmeda y deliciosa, hecha sin productos de origen animal, perfecta para veganos.',
-    tipo: null,
-    tamañoBase: 'Mediano',
-    personalizable: true,
-    destacado: true,
-  },
-  {
-    id: 'PV002',
-    categoria: 'Productos vegana',
-    categoriaId: 'vegana',
-    nombre: 'Galletas veganas de avena',
-    precio: 4500,
-    descripcion:
-      'Crujientes y sabrosas, estas galletas son una excelente opción para un snack saludable y vegano.',
-    tipo: null,
-    tamañoBase: 'Unidad',
-    personalizable: false,
-    destacado: false,
-  },
-  {
-    id: 'TE001',
-    categoria: 'Tortas especiales',
-    categoriaId: 'tortas-especiales',
-    nombre: 'Torta especial de cumpleaños',
-    precio: 55000,
-    descripcion:
-      'Diseñada especialmente para celebraciones, personalizable con decoraciones y mensajes únicos.',
-    tipo: null,
-    tamañoBase: 'Mediano',
-    personalizable: true,
-    destacado: true,
-  },
-  {
-    id: 'TE002',
-    categoria: 'Tortas especiales',
-    categoriaId: 'tortas-especiales',
-    nombre: 'Torta especial de boda',
-    precio: 60000,
-    descripcion:
-      'Elegante y deliciosa, esta torta está diseñada para ser el centro de atención en cualquier boda.',
-    tipo: null,
-    tamañoBase: 'Mediano',
-    personalizable: true,
-    destacado: true,
-  },
-]
+const CLAVE_BD = "milSaboresBD";
 
-export default productos
+// Campo para identificar de forma única a cada registro de cada colección
+export const CAMPO_ID = {
+  productos: "codigo",
+  usuarios: "correo",
+  pedidos: "numero",
+  contactos: "id",
+};
+
+// Datos de partida para reutilizacion en pruebas y administracion
+const DATOS_INICIALES = {
+  productos: [
+    { codigo: "TC001", categoria: "Tortas Cuadradas", tipo: "cuadrada", nombre: "Torta Cuadrada de Chocolate", precio: 45000, stock: 12, stockCritico: 3, descripcion: "Torta de chocolate con capas de ganache y un toque de avellanas.", enOferta: false, descuentoOferta: 0, imagen: "assets/img/productos/TC001.jpg" },
+    { codigo: "TC002", categoria: "Tortas Cuadradas", tipo: "cuadrada", nombre: "Torta Cuadrada de Frutas", precio: 50000, stock: 8, stockCritico: 3, descripcion: "Frutas frescas y crema chantilly sobre bizcocho de vainilla.", enOferta: true, descuentoOferta: 10, imagen: "assets/img/productos/TC002.jpg" },
+    { codigo: "TT001", categoria: "Tortas Circulares", tipo: "circular", nombre: "Torta Circular de Vainilla", precio: 40000, stock: 15, stockCritico: 4, descripcion: "Bizcocho de vainilla relleno con crema pastelera.", enOferta: false, descuentoOferta: 0, imagen: "assets/img/productos/TT001.jpg" },
+    { codigo: "TT002", categoria: "Tortas Circulares", tipo: "circular", nombre: "Torta Circular de Manjar", precio: 42000, stock: 10, stockCritico: 3, descripcion: "Torta tradicional chilena con manjar y nueces.", enOferta: true, descuentoOferta: 15, imagen: "assets/img/productos/TT002.jpg" },
+    { codigo: "PI001", categoria: "Postres Individuales", tipo: "individual", nombre: "Mousse de Chocolate", precio: 5000, stock: 30, stockCritico: 5, descripcion: "Postre individual cremoso, hecho con chocolate de alta calidad.", enOferta: false, descuentoOferta: 0, imagen: "assets/img/productos/PI001.jpg" },
+    { codigo: "PI002", categoria: "Postres Individuales", tipo: "individual", nombre: "Tiramisú Clásico", precio: 5500, stock: 25, stockCritico: 5, descripcion: "Postre italiano con capas de café, mascarpone y cacao.", enOferta: true, descuentoOferta: 20, imagen: "assets/img/productos/PI002.jpg" },
+    { codigo: "PT001", categoria: "Pastelería Tradicional", tipo: "tradicional", nombre: "Empanada de Manzana", precio: 3000, stock: 40, stockCritico: 8, descripcion: "Pastelería tradicional rellena de manzanas especiadas.", enOferta: false, descuentoOferta: 0, imagen: "assets/img/productos/PT001.jpg" },
+    { codigo: "PT002", categoria: "Pastelería Tradicional", tipo: "tradicional", nombre: "Tarta de Santiago", precio: 6000, stock: 20, stockCritico: 4, descripcion: "Tradicional tarta española con almendras y azúcar.", enOferta: false, descuentoOferta: 0, imagen: "assets/img/productos/PT002.jpg" },
+    { codigo: "PV001", categoria: "Productos Vegana", tipo: "circular", nombre: "Torta Vegana de Chocolate", precio: 50000, stock: 6, stockCritico: 2, descripcion: "Torta de chocolate húmeda, sin productos de origen animal.", enOferta: false, descuentoOferta: 0, imagen: "assets/img/productos/PV001.jpg" },
+    { codigo: "TE001", categoria: "Tortas Especiales", tipo: "circular", nombre: "Torta Especial de Cumpleaños", precio: 55000, stock: 5, stockCritico: 2, descripcion: "Diseñada para celebraciones, personalizable con mensajes.", enOferta: false, descuentoOferta: 0, imagen: "assets/img/productos/TE001.jpg" },
+  ],
+  usuarios: [
+    { nombre: "Admin", correo: "admin@duoc.cl", contrasena: "admin123", tipo: "administrador", fechaNacimiento: "", telefono: "", codigoFelices50Aplicado: false },
+    { nombre: "Vendedor", correo: "vendedor@duoc.cl", contrasena: "vendedor1", tipo: "vendedor", fechaNacimiento: "", telefono: "", codigoFelices50Aplicado: false },
+    { nombre: "Armando", correo: "armando@gmail.com", contrasena: "armand123", tipo: "cliente", fechaNacimiento: "", telefono: "", codigoFelices50Aplicado: false },
+    { nombre: "Sebastian", correo: "sebastian@gmail.com", contrasena: "sebas123", tipo: "cliente", fechaNacimiento: "", telefono: "", codigoFelices50Aplicado: false },
+    { nombre: "Juan", correo: "juan@duoc.cl", contrasena: "juan12345", tipo: "cliente", fechaNacimiento: "", telefono: "", codigoFelices50Aplicado: false },
+  ],
+  pedidos: [],
+  contactos: [],
+};
+
+function copiaProfunda(valor) {
+  return JSON.parse(JSON.stringify(valor));
+}
+
+function leerDesdeAlmacenamiento() {
+  try {
+    const guardado = localStorage.getItem(CLAVE_BD);
+    if (guardado) return JSON.parse(guardado);
+  } catch (error) {
+    // Si el JSON guardado esta dañado, se usan los datos iniciales
+  }
+  return copiaProfunda(DATOS_INICIALES);
+}
+
+
+let estado = leerDesdeAlmacenamiento();
+const suscriptores = new Set();
+
+function guardar(nuevoEstado) {
+  estado = nuevoEstado;
+  try {
+    localStorage.setItem(CLAVE_BD, JSON.stringify(estado));
+  } catch (error) {
+    // Almacenamiento lleno o no disponible: el estado sigue en memoria
+  }
+  suscriptores.forEach((notificar) => notificar());
+}
+
+// ---------- Suscripción (usada por los hooks de React) ----------
+export function suscribirse(notificar) {
+  suscriptores.add(notificar);
+  return () => suscriptores.delete(notificar);
+}
+
+export function obtenerEstado() {
+  return estado;
+}
+
+// ---------- CRUD genérico ----------
+export function listar(coleccion) {
+  return copiaProfunda(estado[coleccion] || []);
+}
+
+export function obtener(coleccion, id) {
+  const campo = CAMPO_ID[coleccion];
+  const encontrado = (estado[coleccion] || []).find((registro) => registro[campo] === id);
+  return encontrado ? copiaProfunda(encontrado) : null;
+}
+
+export function crear(coleccion, datos) {
+  const campo = CAMPO_ID[coleccion];
+  const registros = estado[coleccion] || [];
+  const nuevo = copiaProfunda(datos);
+  if (campo === "id" && nuevo.id === undefined) {
+    nuevo.id = `${coleccion}-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+  }
+  if (registros.some((registro) => registro[campo] === nuevo[campo])) {
+    throw new Error(`Ya existe un registro con ${campo} "${nuevo[campo]}"`);
+  }
+  guardar({ ...estado, [coleccion]: [...registros, nuevo] });
+  return copiaProfunda(nuevo);
+}
+
+export function actualizar(coleccion, id, cambios) {
+  const campo = CAMPO_ID[coleccion];
+  const registros = estado[coleccion] || [];
+  if (!registros.some((registro) => registro[campo] === id)) {
+    throw new Error(`No existe el registro ${id} en ${coleccion}`);
+  }
+  const nuevosRegistros = registros.map((registro) =>
+    registro[campo] === id ? { ...registro, ...copiaProfunda(cambios) } : registro
+  );
+  guardar({ ...estado, [coleccion]: nuevosRegistros });
+  return obtener(coleccion, id);
+}
+
+export function eliminar(coleccion, id) {
+  const campo = CAMPO_ID[coleccion];
+  const registros = estado[coleccion] || [];
+  const nuevosRegistros = registros.filter((registro) => registro[campo] !== id);
+  if (nuevosRegistros.length === registros.length) return false;
+  guardar({ ...estado, [coleccion]: nuevosRegistros });
+  return true;
+}
+
+// Restaura los datos de partida (útil para pruebas y para el administrador)
+export function reiniciarBaseDatos() {
+  guardar(copiaProfunda(DATOS_INICIALES));
+}
+
+// Sincroniza cambios hechos en otras pestañas del mismo navegador
+if (typeof window !== "undefined") {
+  window.addEventListener("storage", (evento) => {
+    if (evento.key === CLAVE_BD) {
+      estado = leerDesdeAlmacenamiento();
+      suscriptores.forEach((notificar) => notificar());
+    }
+  });
+}

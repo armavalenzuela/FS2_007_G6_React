@@ -1,160 +1,113 @@
-import { useState } from 'react'
-import { Container, Form, Button, Alert, Row, Col } from 'react-bootstrap'
-import { Link, useNavigate } from 'react-router-dom'
-import { useAuth } from '../context/AuthContext'
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useSesion } from "../context/SesionContext.jsx";
+import { obtener } from "../data/baseDatos.js";
+import { validarRegistro } from "../utils/validaciones.js";
+import { CODIGO_FELICES50 } from "../data/reglasNegocio.js";
 
-function Registro() {
-  const { registrar } = useAuth()
-  const navigate = useNavigate()
+const VACIO = { nombre: "", correo: "", fechaNacimiento: "", contrasena: "", confirmacion: "", codigoPromocional: "", terminos: false };
 
-  const [form, setForm] = useState({
-    nombre: '',
-    email: '',
-    password: '',
-    fechaNacimiento: '',
-    codigoDescuento: '',
-  })
-  const [error, setError] = useState('')
-  const [exito, setExito] = useState('')
+export default function Registro() {
+  const { registrar } = useSesion();
+  const navegar = useNavigate();
+  const [form, setForm] = useState(VACIO);
+  const [errores, setErrores] = useState({});
 
-  function actualizarCampo(campo, valor) {
-    setForm((prev) => ({ ...prev, [campo]: valor }))
+  function cambiar(e) {
+    const { name, value, type, checked } = e.target;
+    setForm({ ...form, [name]: type === "checkbox" ? checked : value });
   }
 
-  function manejarSubmit(e) {
-    e.preventDefault()
-    setError('')
-    setExito('')
-
-    const resultado = registrar(form)
-    if (!resultado.ok) {
-      setError(resultado.error)
-      return
+  function enviar(e) {
+    e.preventDefault();
+    const codigo = form.codigoPromocional.trim().toUpperCase();
+    const nuevosErrores = validarRegistro(form, (correo) => Boolean(obtener("usuarios", correo.trim().toLowerCase())));
+    if (codigo && codigo !== CODIGO_FELICES50) {
+      nuevosErrores.codigoPromocional = "El código ingresado no es válido.";
     }
+    setErrores(nuevosErrores);
+    if (Object.keys(nuevosErrores).length > 0) return;
 
-    const u = resultado.usuario
-    const beneficios = []
-    if (u.codigoDescuento === 'FELICES50') beneficios.push('10% de descuento de por vida')
-    if (u.esEstudianteDuoc) beneficios.push('tortas gratis en tu cumpleaños como estudiante Duoc')
-    if (beneficios.length === 0) {
-      setExito('¡Cuenta creada con éxito! Ya puedes iniciar sesión.')
-    } else {
-      setExito(`¡Cuenta creada! Beneficios activados: ${beneficios.join(', ')}.`)
-    }
-
-    setTimeout(() => navigate('/'), 1800)
+    registrar({ ...form, codigoFelices50Aplicado: codigo === CODIGO_FELICES50 });
+    navegar("/mi-cuenta");
   }
+
+  const clase = (campo) => `form-control ${errores[campo] ? "is-invalid" : ""}`;
 
   return (
-    <Container className="my-5">
-      <Row className="justify-content-center">
-        <Col md={8} lg={6}>
-          <div className="border rounded p-4 bg-light">
-            <h1 className="text-center mb-2">Crear cuenta</h1>
-            <p className="text-muted text-center mb-4">
-              Regístrate y obtén beneficios exclusivos de nuestra pastelería
-            </p>
+    <>
+      <header className="hero-mil-sabores text-center">
+        <div className="container">
+          <span className="chip-categoria mb-3 d-inline-block">Únete a Mil Sabores</span>
+          <h1>Crea tu cuenta</h1>
+          <p className="fs-5 mx-auto" style={{ maxWidth: 650 }}>Regístrate y descubre beneficios exclusivos: descuentos por edad, códigos promocionales y regalos de cumpleaños para estudiantes Duoc.</p>
+        </div>
+      </header>
+      <section className="seccion">
+        <div className="container">
+          <div className="row justify-content-center">
+            <div className="col-lg-7">
+              <article className="card-producto p-4 p-md-5 sombra-suave">
+                <div className="p-3 rounded-4 mb-4" style={{ background: "#fffaf1", border: "1px solid var(--color-borde)" }}>
+                  <p className="small mb-1"><strong>🎂 Descuento 50%:</strong> automático para socios de 50 años o más.</p>
+                  <p className="small mb-1"><strong>🎟️ Código FELICES50:</strong> 10% de descuento de por vida.</p>
+                  <p className="small mb-0"><strong>🎓 Correo institucional Duoc:</strong> torta de cumpleaños gratis.</p>
+                </div>
 
-            {error && <Alert variant="danger">{error}</Alert>}
-            {exito && <Alert variant="success">{exito}</Alert>}
+                <form className="form-mil-sabores" onSubmit={enviar} noValidate>
+                  <div className="mb-3">
+                    <label htmlFor="signupNombre" className="form-label">Nombre completo</label>
+                    <input id="signupNombre" name="nombre" className={clase("nombre")} placeholder="Ej: María Pérez" value={form.nombre} onChange={cambiar} />
+                    <div className="invalid-feedback">{errores.nombre}</div>
+                  </div>
 
-            <Form onSubmit={manejarSubmit}>
-              <Form.Group className="mb-3">
-                <Form.Label htmlFor="reg-nombre">Nombre completo</Form.Label>
-               <Form.Control
-                id="reg-nombre"
-                type="text"
-                value={form.nombre}
-                onChange={(e) => { e.target.setCustomValidity(''); actualizarCampo('nombre', e.target.value) }}
-                onInvalid={(e) => e.target.setCustomValidity('Ingresa tu nombre completo')}
-                placeholder="Ej: María Pérez"
-                required
-              />
-              </Form.Group>
+                  <div className="mb-3">
+                    <label htmlFor="signupCorreo" className="form-label">Correo electrónico</label>
+                    <input id="signupCorreo" name="correo" type="email" className={clase("correo")} placeholder="tucorreo@ejemplo.com" value={form.correo} onChange={cambiar} />
+                    <div className="form-text">Si usas un correo @duoc.cl o @profesor.duoc.cl, se activará el beneficio de cumpleaños para estudiantes Duoc.</div>
+                    <div className="invalid-feedback">{errores.correo}</div>
+                  </div>
 
-              <Form.Group className="mb-3">
-                <Form.Label htmlFor="reg-email">Correo electrónico</Form.Label>
-                <Form.Control
-                  id="reg-email"
-                  type="email"
-                  value={form.email}
-                  onChange={(e) => {e.target.setCustomValidity(e.target.validity.typeMismatch ? 'Por favor ingresa un correo válido' : ''); actualizarCampo('email', e.target.value)}}
-                  onInvalid={(e) => e.target.setCustomValidity('Por favor ingresa un correo válido')}
-                  placeholder="tucorreo@ejemplo.com"
-                  required
-                />
-                <Form.Text className="text-muted">
-                  Usa tu correo institucional @duoc.cl para obtener tortas gratis en tu
-                  cumpleaños
-                </Form.Text>
-              </Form.Group>
+                  <div className="mb-3">
+                    <label htmlFor="signupFechaNacimiento" className="form-label">Fecha de nacimiento</label>
+                    <input id="signupFechaNacimiento" name="fechaNacimiento" type="date" className={clase("fechaNacimiento")} value={form.fechaNacimiento} onChange={cambiar} />
+                    <div className="form-text">La usamos solo para calcular tu descuento por edad.</div>
+                    <div className="invalid-feedback">{errores.fechaNacimiento}</div>
+                  </div>
 
-              <Row>
-                <Col md={6}>
-                  <Form.Group className="mb-3">
-                    <Form.Label htmlFor="reg-password">Contraseña</Form.Label>
-                    <Form.Control
-                      id="reg-password"
-                      type="password"
-                      value={form.password}
-                      onChange={(e) => {
-                      const valor = e.target.value
-                      const invalida = valor.length > 0 && (valor.length < 4 || valor.length > 10)
-                      e.target.setCustomValidity(invalida ? 'Ingresa una contraseña de min 4 y max 10 caracteres' : '')
-                      actualizarCampo('password', valor)}}
-                      placeholder="Mínimo 4 caracteres"
-                      required
-                    />
-                  </Form.Group>
-                </Col>
-                <Col md={6}>
-                  <Form.Group className="mb-3">
-                    <Form.Label htmlFor="reg-fecha">Fecha de nacimiento</Form.Label>
-                    <Form.Control
-                      id="reg-fecha"
-                      type="date"
-                      value={form.fechaNacimiento}
-                      onChange={(e) => {
-                      const valor = e.target.value
-                      e.target.setCustomValidity(valor ? '' : 'Ingresa tu fecha de nacimiento')
-                      actualizarCampo('fechaNacimiento', valor)}}  
-                      required
-                    />
-                    <Form.Text className="text-muted">
-                      Mayor de 50 años = 50% de descuento
-                    </Form.Text>
-                  </Form.Group>
-                </Col>
-              </Row>
+                  <div className="row g-3">
+                    <div className="col-md-6">
+                      <label htmlFor="signupPassword" className="form-label">Contraseña</label>
+                      <input id="signupPassword" name="contrasena" type="password" className={clase("contrasena")} value={form.contrasena} onChange={cambiar} />
+                      <div className="form-text">Entre 8 y 10 caracteres.</div>
+                      <div className="invalid-feedback">{errores.contrasena}</div>
+                    </div>
+                    <div className="col-md-6">
+                      <label htmlFor="signupPasswordConfirm" className="form-label">Confirmar contraseña</label>
+                      <input id="signupPasswordConfirm" name="confirmacion" type="password" className={clase("confirmacion")} value={form.confirmacion} onChange={cambiar} />
+                      <div className="invalid-feedback">{errores.confirmacion}</div>
+                    </div>
+                  </div>
 
-              <Form.Group className="mb-4">
-                <Form.Label htmlFor="reg-codigo">Código de descuento (opcional)</Form.Label>
-                <Form.Control
-                  id="reg-codigo"
-                  type="text"
-                  value={form.codigoDescuento}
-                  onChange={(e) => actualizarCampo('codigoDescuento', e.target.value)}
-                  placeholder="Ej: FELICES50"
-                />
-                <Form.Text className="text-muted">
-                  Con FELICES50 obtienes 10% de descuento de por vida
-                </Form.Text>
-              </Form.Group>
+                  <div className="mb-3 mt-3">
+                    <label htmlFor="signupCodigo" className="form-label">Código promocional <span className="texto-secundario">(opcional)</span></label>
+                    <input id="signupCodigo" name="codigoPromocional" className={clase("codigoPromocional")} placeholder="Ej: FELICES50" value={form.codigoPromocional} onChange={cambiar} autoComplete="off" />
+                    <div className="invalid-feedback">{errores.codigoPromocional}</div>
+                  </div>
 
-              <div className="d-grid gap-2">
-                <Button type="submit" variant="dark" size="lg">
-                  Crear cuenta
-                </Button>
-                <Button as={Link} to="/login" variant="outline-dark">
-                  ¿Ya tienes cuenta? Inicia sesión
-                </Button>
-              </div>
-            </Form>
+                  <div className="mb-4 form-check">
+                    <input id="signupTerminos" name="terminos" type="checkbox" className={`form-check-input ${errores.terminos ? "is-invalid" : ""}`} checked={form.terminos} onChange={cambiar} />
+                    <label className="form-check-label" htmlFor="signupTerminos">Acepto los términos y condiciones y la política de privacidad.</label>
+                    <div className="invalid-feedback">{errores.terminos}</div>
+                  </div>
+
+                  <button type="submit" className="btn btn-mil-sabores btn-lg w-100">Crear mi cuenta</button>
+                </form>
+              </article>
+            </div>
           </div>
-        </Col>
-      </Row>
-    </Container>
-  )
+        </div>
+      </section>
+    </>
+  );
 }
-
-export default Registro

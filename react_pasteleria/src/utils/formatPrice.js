@@ -1,4 +1,4 @@
-export function formatPrice(valor) {
-  if (typeof valor !== 'number' || Number.isNaN(valor)) return '$0'
-  return `$${valor.toLocaleString('es-CL')}`
+// Formato para pesos chilenos
+export function formatoPesos(numero) {
+  return "$" + Math.round(Number(numero) || 0).toLocaleString("es-CL");
 }
