@@ -1,6 +1,6 @@
 import { Link, useParams } from "react-router-dom";
-import { useColeccion } from "../hooks/useColeccion.js";
-import { formatoPesos } from "../utils/formato.js";
+import { useColeccion } from "../utils/useColeccion.js";
+import { formatoPesos } from "../utils/formatPrice.js";
 
 // Vista de compra exitosa y boleta. También la usa el administrador para "Mostrar boleta".
 export default function Pedido() {

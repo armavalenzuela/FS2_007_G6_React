@@ -1,8 +1,8 @@
 import { Link } from "react-router-dom";
-import { useColeccion } from "../hooks/useColeccion.js";
+import { useColeccion } from "../utils/useColeccion.js";
 import { useCarrito } from "../context/CarritoContext.jsx";
-import ProductCard from "../components/ProductCard.jsx";
-import Alerta from "../components/Alerta.jsx";
+import ProductCard from "../components/molecules/ProductCard.jsx";
+import Alerta from "../components/organisms/Alerta.jsx";
 import { useState } from "react";
 
 const CATEGORIAS_RAPIDAS = [

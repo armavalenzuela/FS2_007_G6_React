@@ -1,6 +1,6 @@
 import { createContext, useContext, useMemo, useState } from "react";
 import { obtener, actualizar, crear } from "../data/baseDatos.js";
-import { useColeccion } from "../hooks/useColeccion.js";
+import { useColeccion } from "../utils/useColeccion.js";
 
 // Sesión persistida en localStorage con las mismas claves
 const CLAVE_CORREO = "usuarioCorreo";

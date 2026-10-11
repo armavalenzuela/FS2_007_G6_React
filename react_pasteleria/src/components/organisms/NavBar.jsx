@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { NavLink, Link, useNavigate } from "react-router-dom";
-import { useSesion } from "../context/SesionContext.jsx";
-import { useCarrito } from "../context/CarritoContext.jsx";
+import { useSesion } from "../../context/SesionContext.jsx";
+import { useCarrito } from "../../context/CarritoContext.jsx";
 
 const ENLACES = [
   { ruta: "/", texto: "Inicio", fin: true },
