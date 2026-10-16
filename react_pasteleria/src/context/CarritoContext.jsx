@@ -1,13 +1,13 @@
 import { createContext, useContext, useMemo, useState } from "react";
 import { obtener } from "../data/baseDatos.js";
 
-// Carrito persistido 
 const CLAVE_CARRITO = "carritoMilSabores";
 const CarritoContext = createContext(null);
 
 function leerCarrito() {
   try {
-    return JSON.parse(localStorage.getItem(CLAVE_CARRITO)) || [];
+    const guardado = JSON.parse(localStorage.getItem(CLAVE_CARRITO)) || [];
+    return guardado.filter((i) => i && Number.isInteger(i.cantidad) && i.cantidad > 0);
   } catch (error) {
     return [];
   }
@@ -21,8 +21,10 @@ export function CarritoProvider({ children }) {
     setItems(nuevos);
   }
 
-  // Agrega unidades respetando el stock disponible. Devuelve { ok, mensaje }
   function agregar(codigo, cantidad = 1) {
+    if (!Number.isInteger(cantidad) || cantidad < 1) {
+      return { ok: false, mensaje: "Cantidad inválida" };
+    }
     const producto = obtener("productos", codigo);
     if (!producto) return { ok: false, mensaje: "Producto no encontrado" };
     if (producto.stock <= 0) return { ok: false, mensaje: "Producto sin stock" };
@@ -41,8 +43,11 @@ export function CarritoProvider({ children }) {
   }
 
   function cambiarCantidad(codigo, cantidad) {
+    if (!Number.isInteger(cantidad)) return;
     if (cantidad <= 0) return quitar(codigo);
-    guardar(items.map((i) => (i.codigo === codigo ? { ...i, cantidad } : i)));
+    const producto = obtener("productos", codigo);
+    const final = producto ? Math.min(cantidad, producto.stock) : cantidad;
+    guardar(items.map((i) => (i.codigo === codigo ? { ...i, cantidad: final } : i)));
   }
 
   function quitar(codigo) {

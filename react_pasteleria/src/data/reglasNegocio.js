@@ -1,18 +1,13 @@
 
-// Reglas de negocio de Pastelería Mil Sabores.
-// Son funciones puras (sin React ni localStorage) para poder probarlas.
-
-
 export const DOMINIOS_CORREO_PERMITIDOS = ["@duoc.cl", "@profesor.duoc.cl", "@gmail.com"];
 export const DOMINIOS_DUOC = ["@duoc.cl", "@profesor.duoc.cl"];
 export const CODIGO_FELICES50 = "FELICES50";
-export const DESCUENTO_EDAD = 0.5;          // 50% para socios de 50 años o más
-export const DESCUENTO_FELICES50 = 0.1;     // 10% de por vida con el código FELICES50
+export const DESCUENTO_EDAD = 0.5;
+export const DESCUENTO_FELICES50 = 0.1;
 export const EDAD_MINIMA_DESCUENTO = 50;
-export const CODIGO_TORTA_DUOC = "TE001";   // torta de cumpleaños que se regala a cuentas Duoc
+export const CODIGO_TORTA_DUOC = "TE001";
 export const LARGO_CONTRASENA = { minimo: 8, maximo: 10 };
 
-// Calcula la edad en años a partir de una fecha "yyyy-mm-dd"
 export function calcularEdad(fechaNacimiento, hoy = new Date()) {
   if (!fechaNacimiento) return null;
   const nacimiento = new Date(fechaNacimiento + "T00:00:00");
@@ -47,7 +42,6 @@ export function contrasenaValida(contrasena) {
   return largo >= LARGO_CONTRASENA.minimo && largo <= LARGO_CONTRASENA.maximo;
 }
 
-// Precio unitario considerando ofertas activas
 export function precioUnitario(producto) {
   if (producto.enOferta && producto.descuentoOferta > 0) {
     return Math.round(producto.precio * (1 - producto.descuentoOferta / 100));
@@ -109,7 +103,6 @@ export function calcularTotales(items, productos, usuario = null, hoy = new Date
   };
 }
 
-// Valida que haya stock suficiente para los items del carrito
 export function validarStock(items, productos) {
   const problemas = [];
   items.forEach((item) => {
@@ -123,7 +116,6 @@ export function validarStock(items, productos) {
   return problemas;
 }
 
-// Un producto está en stock crítico cuando su stock baja o iguala al minimo definido
 export function esStockCritico(producto) {
   return producto.stock <= (producto.stockCritico ?? 0);
 }

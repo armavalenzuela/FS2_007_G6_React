@@ -1,6 +1,5 @@
 import { precioUnitario } from "../data/reglasNegocio.js";
 
-// Aplica búsqueda por texto, categoría, tipo y orden por precio
 export function filtrarProductos(productos, { texto = "", categoria = "", tipo = "", orden = "" } = {}) {
   const busqueda = texto.trim().toLowerCase();
   const resultado = productos.filter((p) =>

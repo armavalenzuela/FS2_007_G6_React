@@ -1,6 +1,5 @@
 const CLAVE_BD = "milSaboresBD";
 
-// Campo para identificar de forma única a cada registro de cada colección
 export const CAMPO_ID = {
   productos: "codigo",
   usuarios: "correo",
@@ -8,7 +7,6 @@ export const CAMPO_ID = {
   contactos: "id",
 };
 
-// Datos de partida para reutilizacion en pruebas y administracion
 const DATOS_INICIALES = {
   productos: [
     { codigo: "TC001", categoria: "Tortas Cuadradas", tipo: "cuadrada", nombre: "Torta Cuadrada de Chocolate", precio: 45000, stock: 12, stockCritico: 3, descripcion: "Torta de chocolate con capas de ganache y un toque de avellanas.", enOferta: false, descuentoOferta: 0, imagen: "assets/img/productos/TC001.jpg" },
@@ -42,11 +40,9 @@ function leerDesdeAlmacenamiento() {
     const guardado = localStorage.getItem(CLAVE_BD);
     if (guardado) return JSON.parse(guardado);
   } catch (error) {
-    // Si el JSON guardado esta dañado, se usan los datos iniciales
   }
   return copiaProfunda(DATOS_INICIALES);
 }
-
 
 let estado = leerDesdeAlmacenamiento();
 const suscriptores = new Set();
@@ -56,12 +52,10 @@ function guardar(nuevoEstado) {
   try {
     localStorage.setItem(CLAVE_BD, JSON.stringify(estado));
   } catch (error) {
-    // Almacenamiento lleno o no disponible: el estado sigue en memoria
   }
   suscriptores.forEach((notificar) => notificar());
 }
 
-// ---------- Suscripción (usada por los hooks de React) ----------
 export function suscribirse(notificar) {
   suscriptores.add(notificar);
   return () => suscriptores.delete(notificar);
@@ -71,7 +65,6 @@ export function obtenerEstado() {
   return estado;
 }
 
-// ---------- CRUD genérico ----------
 export function listar(coleccion) {
   return copiaProfunda(estado[coleccion] || []);
 }
@@ -118,12 +111,10 @@ export function eliminar(coleccion, id) {
   return true;
 }
 
-// Restaura los datos de partida (útil para pruebas y para el administrador)
 export function reiniciarBaseDatos() {
   guardar(copiaProfunda(DATOS_INICIALES));
 }
 
-// Sincroniza cambios hechos en otras pestañas del mismo navegador
 if (typeof window !== "undefined") {
   window.addEventListener("storage", (evento) => {
     if (evento.key === CLAVE_BD) {

@@ -1,4 +1,3 @@
-// Categorías disponibles para los productos 
 export const CATEGORIAS_PRODUCTO = [
   { nombre: "Tortas Cuadradas" },
   { nombre: "Tortas Circulares" },
@@ -8,7 +7,6 @@ export const CATEGORIAS_PRODUCTO = [
   { nombre: "Tortas Especiales" },
 ];
 
-// Tipo de torta/producto que usa el filtro "Tipo de torta" del catálogo
 export const TIPO_POR_CATEGORIA = {
   "Tortas Cuadradas": "cuadrada",
   "Tortas Circulares": "circular",

@@ -1,4 +1,3 @@
-// Validaciones de formularios (reglas de la vista de contacto, login y registro)
 import { correoPermitido, contrasenaValida, LARGO_CONTRASENA } from "../data/reglasNegocio.js";
 
 export function nombreValido(nombre) {
@@ -15,15 +14,21 @@ export function comentarioValido(comentario) {
   return texto.length > 0 && texto.length <= 500;
 }
 
+function fechaLocal(hoy) {
+  const anio = hoy.getFullYear();
+  const mes = String(hoy.getMonth() + 1).padStart(2, "0");
+  const dia = String(hoy.getDate()).padStart(2, "0");
+  return `${anio}-${mes}-${dia}`;
+}
+
 export function fechaNoFutura(fecha, hoy = new Date()) {
   if (!fecha) return false;
-  const hoyTexto = hoy.toISOString().slice(0, 10);
-  return fecha <= hoyTexto;
+  return fecha <= fechaLocal(hoy);
 }
 
 export function fechaFutura(fecha, hoy = new Date()) {
   if (!fecha) return false;
-  return fecha >= hoy.toISOString().slice(0, 10);
+  return fecha >= fechaLocal(hoy);
 }
 
 export function validarLogin({ correo, contrasena }) {
@@ -59,6 +64,6 @@ export function validarDireccion(datos) {
   if (!datos.calle || !datos.calle.trim()) errores.calle = "Ingresa la calle y número.";
   if (!datos.region) errores.region = "Selecciona una región.";
   if (!datos.comuna) errores.comuna = "Selecciona una comuna.";
-  if (!fechaFutura(datos.fechaEntrega)) errores.fechaEntrega = "La fecha de entrega no puede ser en el pasado.";
+  if (!fechaFutura(datos.fechaEntrega)) errores.fechaEntrega = "Ingresa una fecha de entrega válida (hoy o posterior).";
   return errores;
 }

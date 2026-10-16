@@ -1,14 +1,26 @@
 import { Link, useParams } from "react-router-dom";
+<<<<<<< HEAD
 import { useColeccion } from "../utils/useColeccion.js";
 import { formatoPesos } from "../utils/formatPrice.js";
+=======
+import { useColeccion } from "../hooks/useColeccion.js";
+import { useSesion } from "../context/SesionContext.jsx";
+import { formatoPesos } from "../utils/formato.js";
+>>>>>>> origin/dev/Cristopher
 
-// Vista de compra exitosa y boleta. También la usa el administrador para "Mostrar boleta".
+export const CLAVE_ULTIMO_PEDIDO = "ultimoPedidoMilSabores";
+
 export default function Pedido() {
   const { numero } = useParams();
   const pedidos = useColeccion("pedidos");
+  const { usuario } = useSesion();
   const pedido = pedidos.find((p) => p.numero === numero);
 
-  if (!pedido) {
+  const esAdmin = usuario?.tipo === "administrador";
+  const esDueno = Boolean(usuario && pedido && pedido.usuarioCorreo === usuario.correo);
+  const esReciente = sessionStorage.getItem(CLAVE_ULTIMO_PEDIDO) === numero;
+
+  if (!pedido || (!esAdmin && !esDueno && !esReciente)) {
     return (
       <section className="seccion text-center">
         <div className="container">

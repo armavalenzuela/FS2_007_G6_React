@@ -1,14 +1,14 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useSesion } from "../context/SesionContext.jsx";
 import { validarLogin } from "../utils/validaciones.js";
 
-// Destino según el tipo de usuario, redireccionado después de iniciar sesion
 const DESTINOS = { administrador: "/admin", vendedor: "/admin/productos", cliente: "/mi-cuenta" };
 
 export default function Login() {
   const { login } = useSesion();
   const navegar = useNavigate();
+  const ubicacion = useLocation();
   const [form, setForm] = useState({ correo: "", contrasena: "" });
   const [errores, setErrores] = useState({});
   const [errorGeneral, setErrorGeneral] = useState("");
@@ -25,7 +25,8 @@ export default function Login() {
       setErrorGeneral("Correo o contraseña incorrectos.");
       return;
     }
-    navegar(DESTINOS[usuario.tipo] || "/mi-cuenta");
+    const destino = ubicacion.state?.desde || DESTINOS[usuario.tipo] || "/mi-cuenta";
+    navegar(destino, { replace: true });
   }
 
   return (

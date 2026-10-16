@@ -2,11 +2,9 @@ import { createContext, useContext, useMemo, useState } from "react";
 import { obtener, actualizar, crear } from "../data/baseDatos.js";
 import { useColeccion } from "../utils/useColeccion.js";
 
-// Sesión persistida en localStorage con las mismas claves
 const CLAVE_CORREO = "usuarioCorreo";
 const SesionContext = createContext(null);
 
-// Quita la contraseña antes de exponer el usuario a los componentes
 function sinContrasena(usuario) {
   if (!usuario) return null;
   const { contrasena, ...publico } = usuario;
@@ -17,7 +15,6 @@ export function SesionProvider({ children }) {
   const usuarios = useColeccion("usuarios");
   const [correoSesion, setCorreoSesion] = useState(() => localStorage.getItem(CLAVE_CORREO));
 
-  // Se deriva del listado de usuarios para que los beneficios se actualicen en vivo
   const usuario = useMemo(() => {
     if (!correoSesion) return null;
     return sinContrasena(usuarios.find((u) => u.correo === correoSesion) || null);
@@ -33,7 +30,6 @@ export function SesionProvider({ children }) {
     setCorreoSesion(null);
   }
 
-  // Valida credenciales contra la base de datos simulada
   function login(correo, contrasena) {
     const encontrado = obtener("usuarios", correo.trim().toLowerCase());
     if (!encontrado || encontrado.contrasena !== contrasena) return null;
