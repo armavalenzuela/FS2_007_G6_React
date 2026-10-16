@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useSesion } from "../context/SesionContext.jsx";
 import { califica50, esCorreoDuoc, CODIGO_FELICES50 } from "../data/reglasNegocio.js";
-import Alerta from "../components/organisms/Alerta.jsx";
+import Alerta from "../components/Alerta.jsx";
 
 function Estado({ activo, textoActivo, textoInactivo }) {
   return (

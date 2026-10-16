@@ -1,8 +1,8 @@
 import { Link } from "react-router-dom";
-import { useColeccion } from "../utils/useColeccion.js";
+import { useColeccion } from "../hooks/useColeccion.js";
 import { useCarrito } from "../context/CarritoContext.jsx";
-import ProductCard from "../components/molecules/ProductCard.jsx";
-import Alerta from "../components/organisms/Alerta.jsx";
+import ProductCard from "../components/ProductCard.jsx";
+import Alerta from "../components/Alerta.jsx";
 import { useState } from "react";
 
 const CATEGORIAS_RAPIDAS = [
@@ -38,7 +38,7 @@ export default function Home() {
               </div>
             </div>
             <div className="col-lg-5 text-center">
-              <img src="/assets/img/Logo_sinfondo.png" alt="Logotipo de Pastelería Mil Sabores" className="img-fluid mb-3" style={{ maxHeight: 140 }} />
+              <img src="/img/Logo_sinfondo.png" alt="Logotipo de Pastelería Mil Sabores" className="img-fluid mb-3" style={{ maxHeight: 140 }} />
               <p className="titulo-cursivo fs-2 mb-1">Récord Guinness 1995</p>
               <p className="mb-0">Colaboramos en la creación de la torta más grande del mundo, un hito que sigue inspirando cada receta que sale de nuestro obrador.</p>
             </div>

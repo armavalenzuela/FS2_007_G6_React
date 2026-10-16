@@ -1,18 +1,11 @@
 import { Link, useNavigate } from "react-router-dom";
-import { useColeccion } from "../utils/useColeccion.js";
+import { useColeccion } from "../hooks/useColeccion.js";
 import { useCarrito } from "../context/CarritoContext.jsx";
 import { useSesion } from "../context/SesionContext.jsx";
-<<<<<<< HEAD:react_pasteleria/src/pages/Cart.jsx
-import { calcularTotales, validarStock } from "../data/reglasNegocio.js";
-import { formatoPesos } from "../utils/formatPrice.js";
-import ImagenProducto from "../components/organisms/ImagenProducto.jsx";
-import Alerta from "../components/organisms/Alerta.jsx";
-=======
 import { calcularTotales, validarStock, precioUnitario } from "../data/reglasNegocio.js";
 import { formatoPesos } from "../utils/formato.js";
 import ImagenProducto from "../components/ImagenProducto.jsx";
 import Alerta from "../components/Alerta.jsx";
->>>>>>> origin/dev/Cristopher:react_pasteleria/src/pages/Carrito.jsx
 import { useState } from "react";
 
 export default function Carrito() {

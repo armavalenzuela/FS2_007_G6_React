@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+
 export default function Footer() {
   const anio = new Date().getFullYear();
   return (
@@ -11,9 +13,9 @@ export default function Footer() {
           <div className="col-md-4">
             <h6>Enlaces</h6>
             <ul className="list-unstyled">
-              <li><a href="/catalogo">Catálogo</a></li>
-              <li><a href="/nosotros">Nosotros</a></li>
-              <li><a href="/blog">Blog y recetas</a></li>
+              <li><Link to="/catalogo">Catálogo</Link></li>
+              <li><Link to="/ofertas">Ofertas</Link></li>
+              <li><Link to="/contacto">Contacto</Link></li>
             </ul>
           </div>
           <div className="col-md-4">

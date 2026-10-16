@@ -1,14 +1,12 @@
 import { useState } from "react";
 import { NavLink, Link, useNavigate } from "react-router-dom";
-import { useSesion } from "../../context/SesionContext.jsx";
-import { useCarrito } from "../../context/CarritoContext.jsx";
+import { useSesion } from "../context/SesionContext.jsx";
+import { useCarrito } from "../context/CarritoContext.jsx";
 
 const ENLACES = [
   { ruta: "/", texto: "Inicio", fin: true },
   { ruta: "/catalogo", texto: "Catálogo" },
   { ruta: "/ofertas", texto: "Ofertas" },
-  { ruta: "/nosotros", texto: "Nosotros" },
-  { ruta: "/blog", texto: "Blog" },
   { ruta: "/contacto", texto: "Contacto" },
 ];
 
@@ -22,8 +20,6 @@ export default function Navbar() {
     cerrarSesion();
     navegar("/login");
   }
-
-  const esAdmin = usuario && (usuario.tipo === "administrador" || usuario.tipo === "vendedor");
 
   return (
     <nav className="navbar navbar-expand-lg navbar-mil-sabores sticky-top">
@@ -43,11 +39,6 @@ export default function Navbar() {
                 </NavLink>
               </li>
             ))}
-            {esAdmin && (
-              <li className="nav-item">
-                <NavLink className="nav-link" to="/admin" onClick={() => setMenuAbierto(false)}>Administración</NavLink>
-              </li>
-            )}
             {usuario ? (
               <>
                 {usuario.tipo === "cliente" && (

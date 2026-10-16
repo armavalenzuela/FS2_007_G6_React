@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
-import ImagenProducto from "../organisms/ImagenProducto.jsx";
-import { formatoPesos } from "../../utils/formatPrice.js";
-import { precioUnitario } from "../../data/reglasNegocio.js";
+import ImagenProducto from "./ImagenProducto.jsx";
+import { formatoPesos } from "../utils/formato.js";
+import { precioUnitario } from "../data/reglasNegocio.js";
 
 export default function ProductCard({ producto, onAgregar }) {
   const precioFinal = precioUnitario(producto);

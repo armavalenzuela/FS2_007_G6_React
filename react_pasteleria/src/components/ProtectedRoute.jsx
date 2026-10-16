@@ -1,5 +1,5 @@
-import { Navigate } from "react-router-dom";
-import { useSesion } from "../../context/SesionContext.jsx";
+import { Navigate, useLocation } from "react-router-dom";
+import { useSesion } from "../context/SesionContext.jsx";
 
 export default function ProtectedRoute({ roles, children }) {
   const { usuario } = useSesion();

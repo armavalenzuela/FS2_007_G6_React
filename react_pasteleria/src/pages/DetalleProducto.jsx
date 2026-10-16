@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { useColeccion } from "../utils/useColeccion.js";
+import { useColeccion } from "../hooks/useColeccion.js";
 import { useCarrito } from "../context/CarritoContext.jsx";
-import ImagenProducto from "../components/organisms/ImagenProducto.jsx";
-import Alerta from "../components/organisms/Alerta.jsx";
-import { formatoPesos } from "../utils/formatPrice.js";
+import ImagenProducto from "../components/ImagenProducto.jsx";
+import Alerta from "../components/Alerta.jsx";
+import { formatoPesos } from "../utils/formato.js";
 import { precioUnitario, esStockCritico } from "../data/reglasNegocio.js";
 
 export default function DetalleProducto() {

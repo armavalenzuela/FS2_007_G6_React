@@ -1,12 +1,7 @@
 import { Link, useParams } from "react-router-dom";
-<<<<<<< HEAD
-import { useColeccion } from "../utils/useColeccion.js";
-import { formatoPesos } from "../utils/formatPrice.js";
-=======
 import { useColeccion } from "../hooks/useColeccion.js";
 import { useSesion } from "../context/SesionContext.jsx";
 import { formatoPesos } from "../utils/formato.js";
->>>>>>> origin/dev/Cristopher
 
 export const CLAVE_ULTIMO_PEDIDO = "ultimoPedidoMilSabores";
 

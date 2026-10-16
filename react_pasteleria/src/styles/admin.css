@@ -1,0 +1,48 @@
+
+/* Estilos para vistas del administrador */
+
+.admin-layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+.admin-sidebar {
+  width: 230px;
+  background-color: var(--color-chocolate);
+  color: #fff5e6;
+  padding: 1.5rem 1rem;
+  flex-shrink: 0;
+}
+.admin-sidebar .admin-marca {
+  font-family: var(--font-titulos);
+  font-size: 1.4rem;
+  color: #fff;
+  display: block;
+  margin-bottom: 1.5rem;
+}
+.admin-sidebar a {
+  display: block;
+  color: #ffe8d6;
+  text-decoration: none;
+  padding: .6rem .75rem;
+  border-radius: .5rem;
+  margin-bottom: .25rem;
+  font-weight: 700;
+}
+.admin-sidebar a:hover,
+.admin-sidebar a.active {
+  background-color: rgba(255,255,255,.15);
+  color: #fff;
+}
+
+.admin-contenido {
+  flex-grow: 1;
+  padding: 2rem;
+  background-color: var(--color-fondo);
+}
+
+/* Responsive para las pantallas mas pequeñas */
+@media (max-width: 767px) {
+  .admin-layout { flex-direction: column; }
+  .admin-sidebar { width: 100%; }
+}
