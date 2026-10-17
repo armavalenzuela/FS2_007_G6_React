@@ -20,6 +20,7 @@ export default function Navbar() {
     cerrarSesion();
     navegar("/login");
   }
+  const esPersonal = usuario && (usuario.tipo === "administrador" || usuario.tipo === "vendedor");
 
   return (
     <nav className="navbar navbar-expand-lg navbar-mil-sabores sticky-top">
@@ -40,7 +41,11 @@ export default function Navbar() {
               </li>
             ))}
             {usuario ? (
-              <>
+              <>{esPersonal && (
+                <li className="nav-item">
+                  <NavLink className="nav-link" to="/admin" onClick={() => setMenuAbierto(false)}>Administración</NavLink>
+                </li>
+              )}
                 {usuario.tipo === "cliente" && (
                   <li className="nav-item">
                     <NavLink className="nav-link" to="/mi-cuenta" onClick={() => setMenuAbierto(false)}>Mi cuenta</NavLink>

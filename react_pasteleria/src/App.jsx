@@ -1,6 +1,7 @@
 import { Link, Route, Routes } from "react-router-dom";
 import Layout from "./components/Layout.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
+import AdminLayout from "./components/AdminLayout.jsx";
 import Carrito from "./pages/Carrito.jsx";
 import Catalogo from "./pages/Catalogo.jsx";
 import Checkout from "./pages/Checkout.jsx";
@@ -12,6 +13,11 @@ import MiCuenta from "./pages/MiCuenta.jsx";
 import Ofertas from "./pages/Ofertas.jsx";
 import Pedido from "./pages/Pedido.jsx";
 import Registro from "./pages/Registro.jsx";
+import Dashboard from "./pages/admin/Dashboard.jsx";
+import AdminProductos from "./pages/admin/AdminProductos.jsx";
+import AdminProductoForm from "./pages/admin/AdminProductoForm.jsx";
+import AdminUsuarios from "./pages/admin/AdminUsuarios.jsx";
+import { AdminPedidos, HistorialUsuario } from "./pages/admin/AdminPedidos.jsx";
 
 function NoEncontrado() {
   return (
@@ -58,6 +64,16 @@ export default function App() {
         />
         <Route path="*" element={<NoEncontrado />} />
       </Route>
-    </Routes>
+
+      <Route path="admin" element={<AdminLayout />}>
+        <Route index element={<ProtectedRoute roles={["administrador"]}><Dashboard /></ProtectedRoute>} />
+        <Route path="productos" element={<AdminProductos />} />
+        <Route path="productos/nuevo" element={<AdminProductoForm />} />
+        <Route path="productos/:codigo/editar" element={<AdminProductoForm />} />
+        <Route path="usuarios" element={<ProtectedRoute roles={["administrador"]}><AdminUsuarios /></ProtectedRoute>} />
+        <Route path="usuarios/:correo/historial" element={<ProtectedRoute roles={["administrador"]}><HistorialUsuario /></ProtectedRoute>} />
+        <Route path="pedidos" element={<ProtectedRoute roles={["administrador"]}><AdminPedidos /></ProtectedRoute>} />
+      </Route>
+    </Routes >
   );
 }
