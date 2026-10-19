@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useSesion } from "../context/SesionContext.jsx";
 import { validarLogin } from "../utils/validaciones.js";
 
-const DESTINOS = { administrador: "/admin/Dashboard", vendedor: "/admin/productos", cliente: "/mi-cuenta" };
+const DESTINOS = { administrador: "/admin", vendedor: "/admin/productos", cliente: "/mi-cuenta" };
 
 export default function Login() {
   const { login } = useSesion();

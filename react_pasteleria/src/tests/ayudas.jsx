@@ -40,6 +40,6 @@ export function buscarBoton(contenedor, texto) {
 
 export function disparar(elemento, nombreEvento) {
   act(() => {
-    elemento.dispatchEvent(new Event(nombreEvento));
+    elemento.dispatchEvent(new Event(nombreEvento, { bubbles: true }));
   });
 }

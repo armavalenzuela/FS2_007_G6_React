@@ -1,9 +1,10 @@
-import { MemoryRouter } from "react-router-dom";
+import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { montar, escribir, clic, buscarBoton, disparar } from "./ayudas.jsx";
 import ProductCard from "../components/ProductCard.jsx";
 import Alerta from "../components/Alerta.jsx";
 import ImagenProducto from "../components/ImagenProducto.jsx";
 import Contacto from "../pages/Contacto.jsx";
+import Login from "../pages/Login.jsx";
 import { SesionProvider } from "../context/SesionContext.jsx";
 import { reiniciarBaseDatos } from "../data/baseDatos.js";
 
@@ -103,5 +104,33 @@ describe("Pruebas de estado y eventos (formulario de contacto)", () => {
     escribir(campos.comentario, "Quiero una torta para 20 personas");
     clic(campos.enviar);
     expect(vista.contenedor.textContent).toContain("Tu mensaje fue enviado");
+  });
+});
+
+describe("Inicio de sesión", () => {
+  let vista;
+  beforeEach(() => {
+    reiniciarBaseDatos();
+    localStorage.removeItem("usuarioCorreo");
+  });
+  afterEach(() => vista && vista.limpiar());
+
+  it("redirige al administrador al dashboard", () => {
+    vista = montar(
+      <SesionProvider>
+        <MemoryRouter initialEntries={["/login"]}>
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route path="/admin" element={<p>Dashboard de administración</p>} />
+          </Routes>
+        </MemoryRouter>
+      </SesionProvider>
+    );
+
+    escribir(vista.contenedor.querySelector("#loginCorreo"), "admin@duoc.cl");
+    escribir(vista.contenedor.querySelector("#loginPassword"), "admin123");
+    disparar(vista.contenedor.querySelector("form"), "submit");
+
+    expect(vista.contenedor.textContent).toContain("Dashboard de administración");
   });
 });
