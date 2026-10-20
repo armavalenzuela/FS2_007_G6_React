@@ -43,7 +43,7 @@ export default function Navbar() {
             {usuario ? (
               <>{esPersonal && (
                 <li className="nav-item">
-                  <NavLink className="nav-link" to="/admin" onClick={() => setMenuAbierto(false)}>Administración</NavLink>
+                  <NavLink className="nav-link" to={usuario.tipo === "vendedor" ? "/admin/productos" : "/admin"} onClick={() => setMenuAbierto(false)}>Administración</NavLink>
                 </li>
               )}
                 {usuario.tipo === "cliente" && (
