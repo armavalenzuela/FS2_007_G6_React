@@ -1,0 +1,14 @@
+[Unit]
+Description=API de Pasteleria
+After=network.target
+
+[Service]
+User=pasteleria
+WorkingDirectory=/opt/pasteleria
+StateDirectory=pasteleria
+EnvironmentFile=/etc/pasteleria/pasteleria.env
+ExecStart=/usr/bin/java -jar /opt/pasteleria/pasteleria-api.jar
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
