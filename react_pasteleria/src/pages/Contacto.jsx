@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { crear } from "../data/baseDatos.js";
+import { contactoService } from "../services/contactoService.js";
 import { comentarioValido, nombreValido } from "../utils/validaciones.js";
 
 const FORMULARIO_VACIO = { nombre: "", correo: "", comentario: "" };
@@ -15,7 +15,7 @@ export default function Contacto() {
     setEnviado(false);
   }
 
-  function enviar(evento) {
+  async function enviar(evento) {
     evento.preventDefault();
     const nuevosErrores = {};
 
@@ -32,13 +32,17 @@ export default function Contacto() {
     setErrores(nuevosErrores);
     if (Object.keys(nuevosErrores).length > 0) return;
 
-    crear("contactos", {
-      nombre: formulario.nombre.trim(),
-      correo: formulario.correo.trim().toLowerCase(),
-      comentario: formulario.comentario.trim(),
-    });
-    setFormulario(FORMULARIO_VACIO);
-    setEnviado(true);
+    try {
+      await contactoService.create({
+        nombre: formulario.nombre.trim(),
+        correo: formulario.correo.trim().toLowerCase(),
+        comentario: formulario.comentario.trim(),
+      });
+      setFormulario(FORMULARIO_VACIO);
+      setEnviado(true);
+    } catch (error) {
+      setErrores({ general: "No se pudo enviar el mensaje." });
+    }
   }
 
   const clase = (campo) => `form-control ${errores[campo] ? "is-invalid" : ""}`;

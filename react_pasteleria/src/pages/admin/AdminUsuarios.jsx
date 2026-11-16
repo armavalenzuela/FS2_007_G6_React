@@ -1,49 +1,73 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { useColeccion } from "../../hooks/useColeccion.js";
-import { actualizar, eliminar } from "../../data/baseDatos.js";
-import { useSesion } from "../../context/SesionContext.jsx";
+import { usuarioService } from "../../services/usuarioService.js";
+import { useAuth } from "../../context/AuthContext.jsx";
+import { getErrorMessage } from "../../utils/getErrorMessage.js";
 
 const TIPOS = ["cliente", "vendedor", "administrador"];
 
-// Listado de usuarios: cambiar rol, eliminar cuenta e ir al historial de compras
 export default function AdminUsuarios() {
-  const usuarios = useColeccion("usuarios");
-  const { usuario: sesion } = useSesion();
+  const { usuario: sesion } = useAuth();
+  const [usuarios, setUsuarios] = useState([]);
   const [mensaje, setMensaje] = useState("");
+  const [error, setError] = useState("");
 
-  function cambiarTipo(correo, tipo) {
-    actualizar("usuarios", correo, { tipo });
-    setMensaje(`Rol de ${correo} actualizado a ${tipo}.`);
+  async function cargar() {
+    setError("");
+    try {
+      setUsuarios(await usuarioService.list());
+    } catch (exception) {
+      setError(getErrorMessage(exception));
+    }
   }
 
-  function borrar(correo) {
-    if (!window.confirm(`¿Eliminar la cuenta ${correo}?`)) return;
-    eliminar("usuarios", correo);
-    setMensaje(`Cuenta ${correo} eliminada.`);
+  useEffect(() => {
+    cargar();
+  }, []);
+
+  async function cambiarTipo(usuario, tipo) {
+    try {
+      await usuarioService.update(usuario.id, { ...usuario, tipo });
+      setMensaje(`Rol de ${usuario.correo} actualizado a ${tipo}.`);
+      await cargar();
+    } catch (exception) {
+      setError(getErrorMessage(exception));
+    }
+  }
+
+  async function borrar(usuario) {
+    if (!window.confirm(`¿Eliminar la cuenta ${usuario.correo}?`)) return;
+    try {
+      await usuarioService.remove(usuario.id);
+      setMensaje(`Cuenta ${usuario.correo} eliminada.`);
+      await cargar();
+    } catch (exception) {
+      setError(getErrorMessage(exception));
+    }
   }
 
   return (
     <>
-      <h1>Usuarios</h1>
+      <h1>Usuarios (API)</h1>
+      {error && <div className="alert alert-danger small py-2">{error}</div>}
       {mensaje && <div className="alert alert-info py-2 small">{mensaje}</div>}
       <div className="card-producto p-3 table-responsive">
         <table className="table table-striped mb-0">
           <thead><tr><th>Nombre</th><th>Correo</th><th>Tipo</th><th></th></tr></thead>
           <tbody>
             {usuarios.map((u) => (
-              <tr key={u.correo}>
+              <tr key={u.id}>
                 <td>{u.nombre}</td>
                 <td>{u.correo}</td>
                 <td>
-                  <select className="form-select form-select-sm" value={u.tipo} disabled={u.correo === sesion.correo}
-                    onChange={(e) => cambiarTipo(u.correo, e.target.value)}>
+                  <select className="form-select form-select-sm" value={u.tipo} disabled={u.correo === sesion?.correo}
+                    onChange={(e) => cambiarTipo(u, e.target.value)}>
                     {TIPOS.map((t) => <option key={t}>{t}</option>)}
                   </select>
                 </td>
                 <td className="text-end text-nowrap">
                   <Link to={`/admin/usuarios/${encodeURIComponent(u.correo)}/historial`} className="btn btn-sm btn-outline-mil-sabores me-1">Historial</Link>
-                  <button className="btn btn-sm btn-danger" disabled={u.correo === sesion.correo} onClick={() => borrar(u.correo)}>Eliminar</button>
+                  <button className="btn btn-sm btn-danger" disabled={u.correo === sesion?.correo} onClick={() => borrar(u)}>Eliminar</button>
                 </td>
               </tr>
             ))}

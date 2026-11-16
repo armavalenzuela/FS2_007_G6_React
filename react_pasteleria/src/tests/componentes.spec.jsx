@@ -6,6 +6,14 @@ import ImagenProducto from "../components/ImagenProducto.jsx";
 import Contacto from "../pages/Contacto.jsx";
 import Login from "../pages/Login.jsx";
 import { SesionProvider } from "../context/SesionContext.jsx";
+import { AuthProvider } from "../context/AuthContext.jsx";
+import { vi } from "vitest";
+vi.mock("../services/authService", () => ({
+  authService: { login: vi.fn().mockRejectedValue(new Error("sin backend")) },
+}));
+vi.mock("../services/contactoService", () => ({
+  contactoService: { create: vi.fn().mockResolvedValue({ id: 1 }) },
+}));
 import { reiniciarBaseDatos } from "../data/baseDatos.js";
 
 const producto = {
@@ -97,12 +105,13 @@ describe("Pruebas de estado y eventos (formulario de contacto)", () => {
     expect(vista.contenedor.textContent).toContain("solo letras");
   });
 
-  it("muestra el mensaje de éxito y limpia el formulario al enviar datos válidos", () => {
+  it("muestra el mensaje de éxito y limpia el formulario al enviar datos válidos", async () => {
     const campos = montarContacto();
     escribir(campos.nombre, "Ana Pérez");
     escribir(campos.correo, "ana@gmail.com");
     escribir(campos.comentario, "Quiero una torta para 20 personas");
     clic(campos.enviar);
+    await new Promise((resolve) => setTimeout(resolve, 0));
     expect(vista.contenedor.textContent).toContain("Tu mensaje fue enviado");
   });
 });
@@ -115,21 +124,24 @@ describe("Inicio de sesión", () => {
   });
   afterEach(() => vista && vista.limpiar());
 
-  it("redirige al administrador al dashboard", () => {
+  it("redirige al administrador al dashboard", async () => {
     vista = montar(
       <SesionProvider>
-        <MemoryRouter initialEntries={["/login"]}>
-          <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route path="/admin" element={<p>Dashboard de administración</p>} />
-          </Routes>
-        </MemoryRouter>
+        <AuthProvider>
+          <MemoryRouter initialEntries={["/login"]}>
+            <Routes>
+              <Route path="/login" element={<Login />} />
+              <Route path="/admin" element={<p>Dashboard de administración</p>} />
+            </Routes>
+          </MemoryRouter>
+        </AuthProvider>
       </SesionProvider>
     );
 
     escribir(vista.contenedor.querySelector("#loginCorreo"), "admin@duoc.cl");
     escribir(vista.contenedor.querySelector("#loginPassword"), "admin123");
     disparar(vista.contenedor.querySelector("form"), "submit");
+    await new Promise((resolve) => setTimeout(resolve, 0));
 
     expect(vista.contenedor.textContent).toContain("Dashboard de administración");
   });

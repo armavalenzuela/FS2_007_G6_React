@@ -1,32 +1,42 @@
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useSesion } from "../context/SesionContext.jsx";
+import { useAuth } from "../context/AuthContext.jsx";
 import { validarLogin } from "../utils/validaciones.js";
 
 const DESTINOS = { administrador: "/admin", vendedor: "/admin/productos", cliente: "/mi-cuenta" };
 
 export default function Login() {
-  const { login } = useSesion();
+  const { login: loginSesion } = useSesion();
+  const { login: loginAuth } = useAuth();
   const navegar = useNavigate();
   const ubicacion = useLocation();
   const [form, setForm] = useState({ correo: "", contrasena: "" });
   const [errores, setErrores] = useState({});
   const [errorGeneral, setErrorGeneral] = useState("");
 
-  function enviar(e) {
+  async function enviar(e) {
     e.preventDefault();
     const nuevosErrores = validarLogin(form);
     setErrores(nuevosErrores);
     setErrorGeneral("");
     if (Object.keys(nuevosErrores).length > 0) return;
 
-    const usuario = login(form.correo, form.contrasena);
-    if (!usuario) {
-      setErrorGeneral("Correo o contraseña incorrectos.");
+    try {
+      const respuesta = await loginAuth(form.correo, form.contrasena);
+      const tipo = respuesta.rol === "ADMIN" ? "administrador" : respuesta.rol === "VENDEDOR" ? "vendedor" : "cliente";
+      const destino = ubicacion.state?.desde || DESTINOS[tipo] || "/mi-cuenta";
+      navegar(destino, { replace: true });
       return;
+    } catch (error) {
+      const usuario = loginSesion(form.correo, form.contrasena);
+      if (!usuario) {
+        setErrorGeneral("Correo o contraseña incorrectos.");
+        return;
+      }
+      const destino = ubicacion.state?.desde || DESTINOS[usuario.tipo] || "/mi-cuenta";
+      navegar(destino, { replace: true });
     }
-    const destino = ubicacion.state?.desde || DESTINOS[usuario.tipo] || "/mi-cuenta";
-    navegar(destino, { replace: true });
   }
 
   return (

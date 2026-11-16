@@ -40,6 +40,8 @@ public class ProductoService {
         producto.setEnOferta(input.enOferta() == null ? false : input.enOferta());
         producto.setDescuentoOferta(input.descuentoOferta() == null ? 0 : input.descuentoOferta());
         producto.setImagen(input.imagen());
+        producto.setStockCritico(input.stockCritico() == null ? 0 : input.stockCritico());
+        producto.setTipo(input.tipo() == null || input.tipo().isBlank() ? "tradicional" : input.tipo().strip());
         return repository.save(producto);
     }
 
@@ -49,8 +51,10 @@ public class ProductoService {
         producto.setCodigo(input.codigo().strip());
         producto.setNombre(input.nombre().strip());
         producto.setCategoria(input.categoria().strip());
+        producto.setTipo(input.tipo() == null || input.tipo().isBlank() ? "tradicional" : input.tipo().strip());
         producto.setPrecio(input.precio());
         producto.setStock(input.stock());
+        producto.setStockCritico(input.stockCritico() == null ? 0 : input.stockCritico());
         producto.setDescripcion(input.descripcion() == null ? null : input.descripcion().strip());
         producto.setEnOferta(input.enOferta() == null ? false : input.enOferta());
         producto.setDescuentoOferta(input.descuentoOferta() == null ? 0 : input.descuentoOferta());

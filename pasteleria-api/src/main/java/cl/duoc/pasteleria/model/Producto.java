@@ -21,6 +21,7 @@ public class Producto {
 
     @Column(nullable = false)
     private String categoria;
+    private String tipo = "tradicional";
 
     @Column(nullable = false, precision = 12, scale = 2)
     private BigDecimal precio;
@@ -28,6 +29,7 @@ public class Producto {
     @Column(nullable = false)
     private Integer stock;
 
+    private Integer stockCritico = 0;
     private String descripcion;
     private Boolean enOferta = false;
     private Integer descuentoOferta = 0;
@@ -47,8 +49,10 @@ public class Producto {
     public String getCodigo() { return codigo; }
     public String getNombre() { return nombre; }
     public String getCategoria() { return categoria; }
+    public String getTipo() { return tipo; }
     public BigDecimal getPrecio() { return precio; }
     public Integer getStock() { return stock; }
+    public Integer getStockCritico() { return stockCritico; }
     public String getDescripcion() { return descripcion; }
     public Boolean getEnOferta() { return enOferta; }
     public Integer getDescuentoOferta() { return descuentoOferta; }
@@ -57,8 +61,10 @@ public class Producto {
     public void setCodigo(String codigo) { this.codigo = codigo; }
     public void setNombre(String nombre) { this.nombre = nombre; }
     public void setCategoria(String categoria) { this.categoria = categoria; }
+    public void setTipo(String tipo) { this.tipo = tipo; }
     public void setPrecio(BigDecimal precio) { this.precio = precio; }
     public void setStock(Integer stock) { this.stock = stock; }
+    public void setStockCritico(Integer stockCritico) { this.stockCritico = stockCritico; }
     public void setDescripcion(String descripcion) { this.descripcion = descripcion; }
     public void setEnOferta(Boolean enOferta) { this.enOferta = enOferta; }
     public void setDescuentoOferta(Integer descuentoOferta) { this.descuentoOferta = descuentoOferta; }

@@ -1,5 +1,4 @@
 import { Link, Route, Routes } from "react-router-dom";
-import { LoginCallback, RequireJwt } from "./auth/AuthRoutes.jsx";
 import Layout from "./components/Layout.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import AdminLayout from "./components/AdminLayout.jsx";
@@ -43,7 +42,6 @@ function PagoFallido() {
 export default function App() {
   return (
     <Routes>
-      <Route path="auth/callback" element={<LoginCallback />} />
       <Route element={<Layout />}>
         <Route index element={<Home />} />
         <Route path="catalogo" element={<Catalogo />} />

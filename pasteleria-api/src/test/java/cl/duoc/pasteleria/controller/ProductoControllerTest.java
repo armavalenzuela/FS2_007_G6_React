@@ -5,6 +5,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import cl.duoc.pasteleria.security.JwtAuthFilter;
+import cl.duoc.pasteleria.security.JwtService;
 import cl.duoc.pasteleria.service.ProductoService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,10 +21,12 @@ import org.springframework.test.web.servlet.MockMvc;
 class ProductoControllerTest {
     @Autowired MockMvc mvc;
     @MockitoBean ProductoService service;
+    @MockitoBean JwtService jwtService;
+    @MockitoBean JwtAuthFilter jwtAuthFilter;
 
     @Test
     void rejectsBlankNameBeforeCallingService() throws Exception {
-        mvc.perform(post("/api/productos")
+        mvc.perform(post("/api/v1/productos")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"codigo\":\"TC001\",\"nombre\":\"   \",\"categoria\":\"Tortas\",\"precio\":1000,\"stock\":1}"))
             .andExpect(status().isBadRequest())

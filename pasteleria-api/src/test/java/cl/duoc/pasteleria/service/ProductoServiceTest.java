@@ -20,7 +20,7 @@ class ProductoServiceTest {
         when(repo.save(existing)).thenReturn(existing);
 
         Producto updated = new ProductoService(repo)
-            .update(7L, new ProductoRequest("TC001", "  Torta Nueva  ", "Tortas Cuadradas", new BigDecimal("46000"), 10, "Desc", false, 0, null));
+            .update(7L, new ProductoRequest("TC001", "  Torta Nueva  ", "Tortas Cuadradas", "tradicional", new BigDecimal("46000"), 10, 0, "Desc", false, 0, null));
 
         assertThat(updated).isSameAs(existing);
         assertThat(updated.getNombre()).isEqualTo("Torta Nueva");

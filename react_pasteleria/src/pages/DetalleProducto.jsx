@@ -1,21 +1,41 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { useColeccion } from "../hooks/useColeccion.js";
 import { useCarrito } from "../context/CarritoContext.jsx";
 import ImagenProducto from "../components/ImagenProducto.jsx";
 import Alerta from "../components/Alerta.jsx";
 import { formatoPesos } from "../utils/formato.js";
 import { precioUnitario, esStockCritico } from "../data/reglasNegocio.js";
+import { productoService } from "../services/productoService.js";
+import { getErrorMessage } from "../utils/getErrorMessage.js";
 
 export default function DetalleProducto() {
   const { codigo } = useParams();
-  const productos = useColeccion("productos");
   const { agregar } = useCarrito();
+  const [producto, setProducto] = useState(null);
+  const [cargando, setCargando] = useState(true);
+  const [error, setError] = useState("");
   const [cantidad, setCantidad] = useState(1);
   const [aviso, setAviso] = useState(null);
 
-  const producto = productos.find((p) => p.codigo === codigo);
+  useEffect(() => {
+    let activo = true;
+    setCargando(true);
+    setError("");
+    productoService.list().then((lista) => {
+      if (!activo) return;
+      setProducto(lista.find((p) => p.codigo === codigo) || null);
+      setCargando(false);
+    }).catch((exception) => {
+      if (activo) {
+        setError(getErrorMessage(exception));
+        setCargando(false);
+      }
+    });
+    return () => { activo = false; };
+  }, [codigo]);
 
+  if (cargando) return <section className="seccion"><div className="container text-center py-5"><p>Cargando producto...</p></div></section>;
+  if (error) return <section className="seccion"><div className="container text-center py-5"><Alerta tipo="danger">{error}</Alerta><Link to="/catalogo" className="btn btn-mil-sabores">Ir al catálogo</Link></div></section>;
   if (!producto) {
     return (
       <section className="seccion">

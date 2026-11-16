@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { crear, actualizar, obtener } from "../../data/baseDatos.js";
+import { productoService } from "../../services/productoService.js";
 import { CATEGORIAS_PRODUCTO, TIPO_POR_CATEGORIA } from "../../data/catalogos.js";
 
 // OJO: en tu proyecto las imágenes se sirven desde /img/productos/ (publicDir: "assets")
@@ -11,16 +11,45 @@ export default function AdminProductoForm() {
   const { codigo } = useParams();
   const navegar = useNavigate();
   const editando = Boolean(codigo);
-  const original = editando ? obtener("productos", codigo) : null;
-
-  const [form, setForm] = useState(original || {
-    codigo: "", nombre: "", descripcion: "", precio: "", stock: "", stockCritico: "",
+  const [form, setForm] = useState({
+    codigo: codigo || "", nombre: "", descripcion: "", precio: "", stock: "", stockCritico: "",
     categoria: "", tipo: "tradicional", enOferta: false, descuentoOferta: 0,
   });
+  const [originalId, setOriginalId] = useState(null);
+  const [cargando, setCargando] = useState(editando);
   const [errores, setErrores] = useState({});
   const [errorGeneral, setErrorGeneral] = useState("");
 
-  if (editando && !original) return <p>No existe el producto solicitado. <Link to="/admin/productos">Volver</Link></p>;
+  useEffect(() => {
+    if (!editando) return;
+    let activo = true;
+    productoService.list().then((lista) => {
+      if (!activo) return;
+      const original = lista.find((p) => p.codigo === codigo);
+      if (original) {
+        setOriginalId(original.id);
+        setForm({
+          codigo: original.codigo,
+          nombre: original.nombre,
+          descripcion: original.descripcion || "",
+          precio: original.precio,
+          stock: original.stock,
+          stockCritico: original.stockCritico || 0,
+          categoria: original.categoria,
+          tipo: original.tipo || "tradicional",
+          enOferta: original.enOferta || false,
+          descuentoOferta: original.descuentoOferta || 0,
+        });
+      }
+      setCargando(false);
+    }).catch(() => {
+      if (activo) setCargando(false);
+    });
+    return () => { activo = false; };
+  }, [codigo, editando]);
+
+  if (editando && cargando) return <p>Cargando producto...</p>;
+  if (editando && !originalId && !cargando) return <p>No existe el producto solicitado. <Link to="/admin/productos">Volver</Link></p>;
 
   function cambiar(e) {
     const { name, value, type, checked } = e.target;
@@ -39,32 +68,33 @@ export default function AdminProductoForm() {
     return e;
   }
 
-  function guardar(e) {
+  async function guardar(e) {
     e.preventDefault();
     const nuevosErrores = validar();
     setErrores(nuevosErrores);
     setErrorGeneral("");
     if (Object.keys(nuevosErrores).length > 0) return;
 
+    const codigoFinal = editando ? codigo : form.codigo.trim().toUpperCase();
     const datos = {
-      ...form,
-      codigo: editando ? codigo : form.codigo.trim().toUpperCase(),
+      codigo: codigoFinal,
       nombre: form.nombre.trim(),
       descripcion: form.descripcion.trim(),
+      categoria: form.categoria,
       precio: Number(form.precio),
       stock: Number(form.stock),
-      stockCritico: form.stockCritico === "" ? 0 : Number(form.stockCritico),
+      enOferta: form.enOferta,
       descuentoOferta: form.enOferta ? Number(form.descuentoOferta) : 0,
-      tipo: TIPO_POR_CATEGORIA[form.categoria] || "tradicional",
-      imagen: FORMATO_IMAGEN(editando ? codigo : form.codigo.trim().toUpperCase()),
+      imagen: FORMATO_IMAGEN(codigoFinal),
     };
     try {
-      if (editando) actualizar("productos", codigo, datos);
-      else crear("productos", datos);
+      if (editando && originalId) await productoService.update(originalId, datos);
+      else await productoService.create(datos);
       navegar("/admin/productos");
     } catch (error) {
-      setErrorGeneral(error.message);
+      setErrorGeneral(error.message || "No se pudo guardar el producto.");
     }
+  }
   }
 
   const clase = (campo) => `form-control ${errores[campo] ? "is-invalid" : ""}`;
