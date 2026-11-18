@@ -15,6 +15,7 @@ Checklist únicamente con los requisitos de:
 - [x] Rutas versionadas en la API.
 - [x] Endpoints documentados en Swagger.
 - [x] Autenticación de usuarios con roles y JWT.
+- [x] Contactos reducido a creación pública (sin CRUD de admin; solo formulario de usuario).
 - [x] Compilar y ejecutar backend para validación final.
 
 ## 2. Integración frontend-backend
@@ -50,6 +51,7 @@ Checklist únicamente con los requisitos de:
 - [x] Documento de integración.
 - [x] Documentación de APIs.
 - [x] Documento ERS.
+- [x] Documento APIs e Integración (`docs/API.md`, `docs/Integracion.md`).
 - [ ] Manual de usuario con pantallazos detallados.
 
 ## 6. Pruebas
@@ -59,6 +61,7 @@ Checklist únicamente con los requisitos de:
 
 ## 7. Estado final
 - [x] Validación final completa con backend ejecutándose (MySQL).
-- [x] Verificación de roles y permisos.
+- [x] Verificación de roles y permisos (admin/vendedor/cliente).
 - [x] Verificación de persistencia de sesión (sessionStorage JWT).
+- [x] Zips regenerados (`pasteleria-backend.zip`, `pasteleria-frontend.zip`) con código actual.
 - [ ] Entrega de documentos y presentación.
