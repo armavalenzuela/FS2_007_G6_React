@@ -1,3 +1,9 @@
-INSERT INTO usuario (correo, nombre, contrasena, tipo) VALUES ('admin@duoc.cl','Admin','admin123','ADMIN');
-INSERT INTO usuario (correo, nombre, contrasena, tipo) VALUES ('vendedor@duoc.cl','Vendedor','vendedor1','VENDEDOR');
-INSERT INTO usuario (correo, nombre, contrasena, tipo) VALUES ('cliente@duoc.cl','Cliente','cliente123','CLIENTE');
+INSERT IGNORE INTO usuario (correo, nombre, contrasena, tipo) VALUES ('admin@duoc.cl','Admin','admin123','ADMIN');
+INSERT IGNORE INTO usuario (correo, nombre, contrasena, tipo) VALUES ('vendedor@duoc.cl','Vendedor','vendedor1','VENDEDOR');
+INSERT IGNORE INTO usuario (correo, nombre, contrasena, tipo) VALUES ('cliente@duoc.cl','Cliente','cliente123','CLIENTE');
+
+INSERT IGNORE INTO producto (codigo, nombre, categoria, tipo, precio, stock, stock_critico, descripcion, en_oferta, descuento_oferta, imagen) VALUES ('TC001','Torta Cuadrada de Chocolate','Tortas Cuadradas','cuadrada',45000,12,3,'Torta de chocolate con capas de ganache y un toque de avellanas.',FALSE,0,'/img/productos/TC001.jpg');
+INSERT IGNORE INTO producto (codigo, nombre, categoria, tipo, precio, stock, stock_critico, descripcion, en_oferta, descuento_oferta, imagen) VALUES ('TC002','Torta Cuadrada de Frutas','Tortas Cuadradas','cuadrada',50000,8,3,'Frutas frescas y crema chantilly sobre bizcocho de vainilla.',TRUE,10,'/img/productos/TC002.jpg');
+INSERT IGNORE INTO producto (codigo, nombre, categoria, tipo, precio, stock, stock_critico, descripcion, en_oferta, descuento_oferta, imagen) VALUES ('TT001','Torta Circular de Vainilla','Tortas Circulares','circular',40000,15,4,'Bizcocho de vainilla relleno con crema pastelera.',FALSE,0,'/img/productos/TT001.jpg');
+INSERT IGNORE INTO producto (codigo, nombre, categoria, tipo, precio, stock, stock_critico, descripcion, en_oferta, descuento_oferta, imagen) VALUES ('PI001','Mousse de Chocolate','Postres Individuales','individual',5000,30,5,'Postre individual cremoso, hecho con chocolate de alta calidad.',FALSE,0,'/img/productos/PI001.jpg');
+INSERT IGNORE INTO producto (codigo, nombre, categoria, tipo, precio, stock, stock_critico, descripcion, en_oferta, descuento_oferta, imagen) VALUES ('PT001','Empanada de Manzana','Pasteleria Tradicional','tradicional',3000,40,8,'Pasteleria tradicional rellena de manzanas especiadas.',FALSE,0,'/img/productos/PT001.jpg');

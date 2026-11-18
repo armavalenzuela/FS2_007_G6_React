@@ -1,5 +1,6 @@
 import { NavLink, Link, Outlet, useNavigate } from "react-router-dom";
 import { useSesion } from "../context/SesionContext.jsx";
+import { useAuth } from "../context/AuthContext.jsx";
 import ProtectedRoute from "./ProtectedRoute.jsx";
 
 // Menú lateral del panel. El vendedor solo ve Productos.
@@ -19,12 +20,14 @@ export default function AdminLayout() {
 }
 
 function Shell() {
-    const { usuario, cerrarSesion } = useSesion();
+    const { usuario: usuarioSesion, cerrarSesion } = useSesion();
+    const { usuario: usuarioAuth, logout: logoutAuth } = useAuth();
     const navegar = useNavigate();
-    const esAdmin = usuario.tipo === "administrador";
+    const esAdmin = usuarioSesion?.tipo === "administrador" || usuarioAuth?.rol === "ADMIN";
 
     function salir() {
-        cerrarSesion();
+        try { cerrarSesion(); } catch (e) { /* ignore */ }
+        try { logoutAuth(); } catch (e) { /* ignore */ }
         navegar("/login");
     }
 

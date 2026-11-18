@@ -95,7 +95,6 @@ export default function AdminProductoForm() {
       setErrorGeneral(error.message || "No se pudo guardar el producto.");
     }
   }
-  }
 
   const clase = (campo) => `form-control ${errores[campo] ? "is-invalid" : ""}`;
   const fb = (campo) => <div className="invalid-feedback">{errores[campo]}</div>;

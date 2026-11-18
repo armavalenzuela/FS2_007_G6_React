@@ -1,15 +1,25 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { useColeccion } from "../../hooks/useColeccion.js";
 import { esStockCritico } from "../../data/reglasNegocio.js";
 import { formatoPesos } from "../../utils/formato.js";
+import { productoService } from "../../services/productoService.js";
+import { usuarioService } from "../../services/usuarioService.js";
+import { pedidoService } from "../../services/pedidoService.js";
 
 // Panel de inicio del administrador con métricas calculadas desde la base de datos
 export default function Dashboard() {
-  const productos = useColeccion("productos");
-  const usuarios = useColeccion("usuarios");
-  const pedidos = useColeccion("pedidos");
+  const [productos, setProductos] = useState([]);
+  const [usuarios, setUsuarios] = useState([]);
+  const [pedidos, setPedidos] = useState([]);
+
+  useEffect(() => {
+    productoService.list().then(setProductos).catch(() => setProductos([]));
+    usuarioService.list().then(setUsuarios).catch(() => setUsuarios([]));
+    pedidoService.list().then(setPedidos).catch(() => setPedidos([]));
+  }, []);
+
   const criticos = productos.filter(esStockCritico);
-  const ventas = pedidos.reduce((suma, p) => suma + p.total, 0);
+  const ventas = pedidos.reduce((suma, p) => suma + Number(p.total || 0), 0);
 
   const tarjetas = [
     { titulo: "Ventas", valor: formatoPesos(ventas), detalle: `${pedidos.length} pedidos`, color: "primary" },

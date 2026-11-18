@@ -1,4 +1,4 @@
-import { crear, obtener, actualizar } from "../data/baseDatos.js";
+import { crear } from "../data/baseDatos.js";
 import { validarStock } from "../data/reglasNegocio.js";
 
 export function generarNumeroPedido(ahora = Date.now()) {
@@ -31,13 +31,6 @@ export function registrarPedido({ items, resumen, datosEnvio, usuario, metodoPag
     descuentoCodigo: resumen.descuentoCodigo,
     total: resumen.total,
     estado: "pagado",
-  });
-
-  resumen.lineas.forEach((linea) => {
-    const producto = obtener("productos", linea.codigo);
-    if (producto) {
-      actualizar("productos", linea.codigo, { stock: Math.max(0, producto.stock - linea.cantidad) });
-    }
   });
 
   return pedido;

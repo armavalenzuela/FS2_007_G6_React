@@ -1,9 +1,9 @@
 import { Link } from "react-router-dom";
-import { useColeccion } from "../hooks/useColeccion.js";
 import { useCarrito } from "../context/CarritoContext.jsx";
 import ProductCard from "../components/ProductCard.jsx";
 import Alerta from "../components/Alerta.jsx";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { productoService } from "../services/productoService.js";
 
 const CATEGORIAS_RAPIDAS = [
   { nombre: "Tortas Cuadradas", etiqueta: "Tortas Cuadradas" },
@@ -13,9 +13,13 @@ const CATEGORIAS_RAPIDAS = [
 ];
 
 export default function Home() {
-  const productos = useColeccion("productos");
+  const [productos, setProductos] = useState([]);
   const { agregar } = useCarrito();
   const [aviso, setAviso] = useState(null);
+
+  useEffect(() => {
+    productoService.list().then(setProductos).catch(() => setProductos([]));
+  }, []);
 
   function añadir(codigo) {
     const resultado = agregar(codigo, 1);

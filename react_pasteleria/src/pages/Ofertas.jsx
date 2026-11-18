@@ -1,14 +1,17 @@
-import { useColeccion } from "../hooks/useColeccion.js";
 import { useCarrito } from "../context/CarritoContext.jsx";
 import ProductCard from "../components/ProductCard.jsx";
 import Alerta from "../components/Alerta.jsx";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { productoService } from "../services/productoService.js";
 
 // Muestra solo los productos que están en oferta
 export default function Ofertas() {
-  const productos = useColeccion("productos");
+  const [productos, setProductos] = useState([]);
   const { agregar } = useCarrito();
   const [aviso, setAviso] = useState(null);
+  useEffect(() => {
+    productoService.list().then(setProductos).catch(() => setProductos([]));
+  }, []);
   const enOferta = productos.filter((p) => p.enOferta && p.descuentoOferta > 0);
 
   function añadir(codigo) {

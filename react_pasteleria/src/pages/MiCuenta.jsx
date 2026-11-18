@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { useSesion } from "../context/SesionContext.jsx";
+import { useAuth } from "../context/AuthContext.jsx";
+import { usuarioService } from "../services/usuarioService.js";
 import { califica50, esCorreoDuoc, CODIGO_FELICES50 } from "../data/reglasNegocio.js";
 import Alerta from "../components/Alerta.jsx";
 
@@ -12,44 +14,93 @@ function Estado({ activo, textoActivo, textoInactivo }) {
 }
 
 export default function MiCuenta() {
-  const { usuario, actualizarPerfil } = useSesion();
+  const { usuario: sesionUsuario, actualizarPerfil } = useSesion();
+  const { usuario: authUsuario } = useAuth();
+  const correoAuth = authUsuario?.correo || sesionUsuario?.correo || null;
+
+  const [usuario, setUsuario] = useState(sesionUsuario || null);
   const [datos, setDatos] = useState({ nombre: "", correo: "", fechaNacimiento: "", telefono: "" });
   const [codigo, setCodigo] = useState("");
   const [mensajeCodigo, setMensajeCodigo] = useState(null);
   const [mensajePerfil, setMensajePerfil] = useState(null);
 
   useEffect(() => {
-    if (usuario) {
-      setDatos({
-        nombre: usuario.nombre,
-        correo: usuario.correo,
-        fechaNacimiento: usuario.fechaNacimiento || "",
-        telefono: usuario.telefono || "",
-      });
+    let activo = true;
+    async function cargar() {
+      if (correoAuth) {
+        try {
+          const lista = await usuarioService.list();
+          const encontrado = lista.find((u) => u.correo === correoAuth);
+          if (activo && encontrado) {
+            setUsuario(encontrado);
+            setDatos({
+              nombre: encontrado.nombre,
+              correo: encontrado.correo,
+              fechaNacimiento: encontrado.fechaNacimiento || "",
+              telefono: encontrado.telefono || "",
+            });
+            return;
+          }
+        } catch (e) { /* fallback */ }
+      }
+      if (activo && sesionUsuario) {
+        setUsuario(sesionUsuario);
+        setDatos({
+          nombre: sesionUsuario.nombre,
+          correo: sesionUsuario.correo,
+          fechaNacimiento: sesionUsuario.fechaNacimiento || "",
+          telefono: sesionUsuario.telefono || "",
+        });
+      }
     }
-  }, [usuario?.nombre, usuario?.correo, usuario?.fechaNacimiento, usuario?.telefono]);
+    cargar();
+    return () => { activo = false; };
+  }, [correoAuth, sesionUsuario?.correo]);
 
-  if (!usuario) return null;
+  if (!usuario && !correoAuth) return null;
 
-  const tieneDescuentoEdad = califica50(usuario.fechaNacimiento);
-  const tieneTortaDuoc = esCorreoDuoc(usuario.correo);
-  const tieneCodigo = usuario.codigoFelices50Aplicado === true;
+  const tieneDescuentoEdad = califica50(usuario?.fechaNacimiento);
+  const tieneTortaDuoc = esCorreoDuoc(usuario?.correo);
+  const tieneCodigo = usuario?.codigoFelices50Aplicado === true;
 
-  function guardar(e) {
+  async function guardar(e) {
     e.preventDefault();
-    actualizarPerfil(usuario.correo, { fechaNacimiento: datos.fechaNacimiento, telefono: datos.telefono });
-    setMensajePerfil({ tipo: "success", texto: "Cambios guardados." });
+    if (!usuario?.id) {
+      actualizarPerfil(usuario.correo, { fechaNacimiento: datos.fechaNacimiento, telefono: datos.telefono });
+      setMensajePerfil({ tipo: "success", texto: "Cambios guardados." });
+      return;
+    }
+    try {
+      const actualizado = await usuarioService.update(usuario.id, { ...usuario, fechaNacimiento: datos.fechaNacimiento, telefono: datos.telefono });
+      setUsuario(actualizado);
+      setMensajePerfil({ tipo: "success", texto: "Cambios guardados." });
+    } catch (err) {
+      setMensajePerfil({ tipo: "danger", texto: "No se pudo guardar." });
+    }
   }
 
-  function aplicarCodigo() {
+  async function aplicarCodigo() {
     if (codigo.trim().toUpperCase() !== CODIGO_FELICES50) {
       setMensajeCodigo({ tipo: "danger", texto: "El código ingresado no es válido." });
       return;
     }
-    actualizarPerfil(usuario.correo, { codigoFelices50Aplicado: true });
-    setCodigo("");
-    setMensajeCodigo({ tipo: "success", texto: "¡Código aplicado con éxito!" });
+    if (!usuario?.id) {
+      actualizarPerfil(usuario.correo, { codigoFelices50Aplicado: true });
+      setCodigo("");
+      setMensajeCodigo({ tipo: "success", texto: "¡Código aplicado con éxito!" });
+      return;
+    }
+    try {
+      const actualizado = await usuarioService.update(usuario.id, { ...usuario, codigoFelices50Aplicado: true });
+      setUsuario(actualizado);
+      setCodigo("");
+      setMensajeCodigo({ tipo: "success", texto: "¡Código aplicado con éxito!" });
+    } catch (err) {
+      setMensajeCodigo({ tipo: "danger", texto: "No se pudo aplicar el código." });
+    }
   }
+
+  if (!usuario) return <section className="seccion text-center"><div className="container"><p>Cargando cuenta...</p></div></section>;
 
   return (
     <>

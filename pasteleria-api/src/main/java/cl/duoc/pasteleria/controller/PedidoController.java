@@ -32,6 +32,9 @@ public class PedidoController {
     @GetMapping("/{id}")
     public Pedido find(@PathVariable("id") Long id) { return service.find(id); }
 
+    @GetMapping("/numero/{numero}")
+    public Pedido findByNumero(@PathVariable("numero") String numero) { return service.findByNumero(numero); }
+
     @Operation(summary = "Crear un pedido")
     @PostMapping
     public ResponseEntity<Pedido> create(@Valid @RequestBody PedidoRequest input) {

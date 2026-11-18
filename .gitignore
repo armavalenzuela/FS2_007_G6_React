@@ -1,4 +1,7 @@
 ﻿pasteleria-api/target/
 
 *.pdf
+*.log
+*.err
+.env.local
 

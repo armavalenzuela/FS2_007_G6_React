@@ -259,7 +259,7 @@ Archivo: `react_pasteleria/src/services/contactoService.js`
 Archivo: `react_pasteleria/src/services/authService.js`
 - Línea 5: `POST /v1/auth/login`
 
-Nota: los servicios de usuarios, pedidos y contactos están disponibles para integración, pero las páginas principales que actualmente los consumen son las de productos y autenticación. Las demás páginas mantienen compatibilidad con la base local.
+Nota: todos los servicios (productos, usuarios, pedidos, contactos, auth) están integrados. Pedidos se persisten en MySQL (POST /api/v1/pedidos) y el stock se descuenta en el backend. AdminPedidos y Pedido leen de la API. Dashboard, Index, Ofertas, Carrito y Checkout consumen productos desde la API.
 
 ## 13. Resumen de flujo completo
 

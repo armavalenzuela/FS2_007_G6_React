@@ -1,23 +1,28 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { useColeccion } from "../hooks/useColeccion.js";
 import { useCarrito } from "../context/CarritoContext.jsx";
 import { useSesion } from "../context/SesionContext.jsx";
+import { productoService } from "../services/productoService.js";
 import { calcularTotales, validarStock } from "../data/reglasNegocio.js";
 import { validarDireccion } from "../utils/validaciones.js";
 import { formatoPesos } from "../utils/formato.js";
 import { METODOS_PAGO, procesarPago } from "../services/pagos.js";
 import { registrarPedido } from "../services/pedidos.js";
+import { pedidoService } from "../services/pedidoService.js";
 import Alerta from "../components/Alerta.jsx";
 import { CLAVE_ULTIMO_PEDIDO } from "./Pedido.jsx";
 
 const HORARIOS = ["Mañana (9:00 - 13:00)", "Tarde (14:00 - 18:00)", "Noche (18:00 - 21:00)"];
 
 export default function Checkout() {
-  const productos = useColeccion("productos");
+  const [productos, setProductos] = useState([]);
   const { items, vaciar } = useCarrito();
   const { usuario } = useSesion();
   const navegar = useNavigate();
+
+  useEffect(() => {
+    productoService.list().then(setProductos).catch(() => setProductos([]));
+  }, []);
 
   const [form, setForm] = useState({
     nombre: usuario?.nombre || "",
@@ -77,6 +82,25 @@ export default function Checkout() {
         datosEnvio: { ...form },
       });
       sessionStorage.setItem(CLAVE_ULTIMO_PEDIDO, pedido.numero);
+      try {
+        await pedidoService.create({
+          numero: pedido.numero,
+          correoCliente: (usuario ? usuario.correo : form.correo).trim().toLowerCase(),
+          fecha: pedido.fecha,
+          envio: JSON.stringify(pedido.envio),
+          metodoPago: pedido.metodoPago,
+          codigoAutorizacion: pedido.codigoAutorizacion,
+          lineas: JSON.stringify(pedido.lineas),
+          subtotal: pedido.subtotal,
+          descuentoTortaDuoc: pedido.descuentoTortaDuoc,
+          descuentoEdad: pedido.descuentoEdad,
+          descuentoCodigo: pedido.descuentoCodigo,
+          total: pedido.total,
+          estado: pedido.estado,
+        });
+      } catch (error) {
+        // No bloquea la compra; el pedido queda en localStorage
+      }
       vaciar();
       navegar(`/pedido/${pedido.numero}`);
     } catch (error) {

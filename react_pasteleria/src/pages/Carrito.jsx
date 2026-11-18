@@ -1,19 +1,23 @@
 import { Link, useNavigate } from "react-router-dom";
-import { useColeccion } from "../hooks/useColeccion.js";
 import { useCarrito } from "../context/CarritoContext.jsx";
 import { useSesion } from "../context/SesionContext.jsx";
 import { calcularTotales, validarStock, precioUnitario } from "../data/reglasNegocio.js";
 import { formatoPesos } from "../utils/formato.js";
 import ImagenProducto from "../components/ImagenProducto.jsx";
 import Alerta from "../components/Alerta.jsx";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { productoService } from "../services/productoService.js";
 
 export default function Carrito() {
-  const productos = useColeccion("productos");
+  const [productos, setProductos] = useState([]);
   const { items, cambiarCantidad, quitar, vaciar } = useCarrito();
   const { usuario } = useSesion();
   const navegar = useNavigate();
   const [aviso, setAviso] = useState(null);
+
+  useEffect(() => {
+    productoService.list().then(setProductos).catch(() => setProductos([]));
+  }, []);
 
   const resumen = calcularTotales(items, productos, usuario);
 

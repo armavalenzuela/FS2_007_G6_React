@@ -1,35 +1,57 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useSesion } from "../context/SesionContext.jsx";
-import { obtener } from "../data/baseDatos.js";
+import { useAuth } from "../context/AuthContext.jsx";
+import { usuarioService } from "../services/usuarioService.js";
 import { validarRegistro } from "../utils/validaciones.js";
 import { CODIGO_FELICES50 } from "../data/reglasNegocio.js";
 
 const VACIO = { nombre: "", correo: "", fechaNacimiento: "", contrasena: "", confirmacion: "", codigoPromocional: "", terminos: false };
 
 export default function Registro() {
-  const { registrar } = useSesion();
+  const { login: loginAuth } = useAuth();
   const navegar = useNavigate();
   const [form, setForm] = useState(VACIO);
   const [errores, setErrores] = useState({});
+  const [errorGeneral, setErrorGeneral] = useState("");
 
   function cambiar(e) {
     const { name, value, type, checked } = e.target;
     setForm({ ...form, [name]: type === "checkbox" ? checked : value });
   }
 
-  function enviar(e) {
+  async function enviar(e) {
     e.preventDefault();
+    setErrorGeneral("");
     const codigo = form.codigoPromocional.trim().toUpperCase();
-    const nuevosErrores = validarRegistro(form, (correo) => Boolean(obtener("usuarios", correo.trim().toLowerCase())));
+    let existente = false;
+    try {
+      const lista = await usuarioService.list();
+      existente = lista.some((u) => u.correo === form.correo.trim().toLowerCase());
+    } catch (err) {
+      existente = false;
+    }
+    const nuevosErrores = validarRegistro(form, () => existente);
     if (codigo && codigo !== CODIGO_FELICES50) {
       nuevosErrores.codigoPromocional = "El código ingresado no es válido.";
     }
     setErrores(nuevosErrores);
     if (Object.keys(nuevosErrores).length > 0) return;
 
-    registrar({ ...form, codigoFelices50Aplicado: codigo === CODIGO_FELICES50 });
-    navegar("/mi-cuenta");
+    try {
+      await usuarioService.create({
+        correo: form.correo.trim().toLowerCase(),
+        nombre: form.nombre.trim(),
+        contrasena: form.contrasena,
+        tipo: "cliente",
+        fechaNacimiento: form.fechaNacimiento,
+        telefono: "",
+        codigoFelices50Aplicado: codigo === CODIGO_FELICES50,
+      });
+      await loginAuth(form.correo.trim().toLowerCase(), form.contrasena);
+      navegar("/mi-cuenta");
+    } catch (error) {
+      setErrorGeneral(error.message || "No se pudo crear la cuenta.");
+    }
   }
 
   const clase = (campo) => `form-control ${errores[campo] ? "is-invalid" : ""}`;
@@ -53,6 +75,8 @@ export default function Registro() {
                   <p className="small mb-1"><strong>🎟️ Código FELICES50:</strong> 10% de descuento de por vida.</p>
                   <p className="small mb-0"><strong>🎓 Correo institucional Duoc:</strong> torta de cumpleaños gratis.</p>
                 </div>
+
+                {errorGeneral && <div className="alert alert-danger small py-2">{errorGeneral}</div>}
 
                 <form className="form-mil-sabores" onSubmit={enviar} noValidate>
                   <div className="mb-3">

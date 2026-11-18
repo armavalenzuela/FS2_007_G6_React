@@ -25,7 +25,7 @@ Checklist únicamente con los requisitos de:
 - [x] Integración de catálogo.
 - [x] Integración de detalle de producto.
 - [x] Integración de contacto.
-- [ ] Migrar pedidos/checkout a la API si se exige integración completa.
+- [x] Migrar pedidos/checkout a la API (persistencia en MySQL, stock descontado en backend).
 - [x] Validación de comunicación REST.
 
 ## 3. Seguridad y sesiones
@@ -38,7 +38,7 @@ Checklist únicamente con los requisitos de:
 ## 4. Roles del sistema
 - [x] Administrador: acceso total.
 - [x] Vendedor: visualiza productos y órdenes con detalle.
-- [ ] Validar que Vendedor no tenga otros accesos.
+- [x] Validar que Vendedor no tenga otros accesos (menú filtrado; escritura restringida a ADMIN).
 - [x] Cliente: acceso a la tienda.
 
 ## 5. Documentación y entregables
@@ -51,16 +51,14 @@ Checklist únicamente con los requisitos de:
 - [x] Documentación de APIs.
 - [x] Documento ERS.
 - [ ] Manual de usuario con pantallazos detallados.
-- [ ] Presentación del caso.
-- [ ] Ronda de preguntas individuales.
 
 ## 6. Pruebas
-- [x] Pruebas backend ejecutadas.
-- [x] Pruebas frontend ejecutadas.
+- [x] Pruebas backend ejecutadas (2/2 OK).
+- [x] Pruebas frontend ejecutadas (46/46 OK).
 - [ ] Pruebas de integración documentadas con resultados.
 
 ## 7. Estado final
-- [ ] Validación final completa con backend ejecutándose.
-- [ ] Verificación de roles y permisos.
-- [ ] Verificación de persistencia de sesión.
+- [x] Validación final completa con backend ejecutándose (MySQL).
+- [x] Verificación de roles y permisos.
+- [x] Verificación de persistencia de sesión (sessionStorage JWT).
 - [ ] Entrega de documentos y presentación.

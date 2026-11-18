@@ -1,18 +1,51 @@
+import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { useColeccion } from "../hooks/useColeccion.js";
 import { useSesion } from "../context/SesionContext.jsx";
 import { formatoPesos } from "../utils/formato.js";
+import { pedidoService } from "../services/pedidoService.js";
 
 export const CLAVE_ULTIMO_PEDIDO = "ultimoPedidoMilSabores";
 
+function normalizarPedido(p) {
+  if (!p) return null;
+  let envio = p.envio;
+  if (typeof envio === "string") {
+    try { envio = JSON.parse(envio); } catch (e) { envio = {}; }
+  }
+  let lineas = p.lineas;
+  if (typeof lineas === "string") {
+    try { lineas = JSON.parse(lineas); } catch (e) { lineas = []; }
+  }
+  return { ...p, envio: envio || {}, lineas: lineas || [] };
+}
+
 export default function Pedido() {
   const { numero } = useParams();
-  const pedidos = useColeccion("pedidos");
   const { usuario } = useSesion();
-  const pedido = pedidos.find((p) => p.numero === numero);
+  const [pedido, setPedido] = useState(null);
+  const [cargando, setCargando] = useState(true);
+
+  useEffect(() => {
+    let activo = true;
+    async function cargar() {
+      // Buscar en backend
+      try {
+        const remoto = await pedidoService.findByNumero(numero);
+        if (activo) setPedido(normalizarPedido(remoto));
+      } catch (e) {
+        if (activo) setPedido(null);
+      } finally {
+        if (activo) setCargando(false);
+      }
+    }
+    cargar();
+    return () => { activo = false; };
+  }, [numero]);
+
+  if (cargando) return <section className="seccion text-center"><div className="container"><p>Cargando pedido...</p></div></section>;
 
   const esAdmin = usuario?.tipo === "administrador";
-  const esDueno = Boolean(usuario && pedido && pedido.usuarioCorreo === usuario.correo);
+  const esDueno = Boolean(usuario && pedido && pedido.correoCliente === usuario.correo);
   const esReciente = sessionStorage.getItem(CLAVE_ULTIMO_PEDIDO) === numero;
 
   if (!pedido || (!esAdmin && !esDueno && !esReciente)) {
@@ -38,17 +71,17 @@ export default function Pedido() {
           <p className="texto-secundario">Autorización: {pedido.codigoAutorizacion || "—"}</p>
 
           <h5 className="mt-3">Datos de entrega</h5>
-          <p className="mb-1"><strong>Nombre:</strong> {envio.nombre} {envio.apellidos}</p>
-          <p className="mb-1"><strong>Correo:</strong> {envio.correo}</p>
-          <p className="mb-1"><strong>Dirección:</strong> {envio.calle}{envio.departamento ? `, depto. ${envio.departamento}` : ""}, {envio.comuna}, {envio.region}</p>
-          <p className="mb-1"><strong>Fecha:</strong> {envio.fechaEntrega} · {envio.horario}</p>
-          {envio.indicaciones && <p className="mb-3"><strong>Indicaciones:</strong> {envio.indicaciones}</p>}
+          <p className="mb-1"><strong>Nombre:</strong> {envio?.nombre} {envio?.apellidos}</p>
+          <p className="mb-1"><strong>Correo:</strong> {envio?.correo}</p>
+          <p className="mb-1"><strong>Dirección:</strong> {envio?.calle}{envio?.departamento ? `, depto. ${envio.departamento}` : ""}, {envio?.comuna}, {envio?.region}</p>
+          <p className="mb-1"><strong>Fecha:</strong> {envio?.fechaEntrega} · {envio?.horario}</p>
+          {envio?.indicaciones && <p className="mb-3"><strong>Indicaciones:</strong> {envio.indicaciones}</p>}
 
           <div className="table-responsive">
             <table className="table align-middle">
               <thead><tr><th>Producto</th><th>Precio</th><th>Cantidad</th><th>Subtotal</th></tr></thead>
               <tbody>
-                {pedido.lineas.map((l) => (
+                {(pedido.lineas || []).map((l) => (
                   <tr key={l.codigo}>
                     <td>{l.nombre}</td><td>{formatoPesos(l.precioUnitario)}</td><td>{l.cantidad}</td><td>{formatoPesos(l.subtotal)}</td>
                   </tr>
