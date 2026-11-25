@@ -4,4 +4,4 @@
 *.log
 *.err
 .env.local
-
+.vscode/
