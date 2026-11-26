@@ -14,11 +14,10 @@ describe("Base de datos simulada (CRUD)", () => {
     expect(bd.obtener("productos", "XX999")).toBeNull();
   });
 
-  it("crea un registro nuevo y lo persiste en localStorage", () => {
+  it("crea un registro nuevo y lo mantiene en memoria", () => {
     bd.crear("productos", { codigo: "NEW01", nombre: "Nueva", precio: 1000, stock: 2, categoria: "Tortas Especiales" });
     expect(bd.obtener("productos", "NEW01").precio).toBe(1000);
-    const guardado = JSON.parse(localStorage.getItem("milSaboresBD"));
-    expect(guardado.productos.some((p) => p.codigo === "NEW01")).toBe(true);
+    expect(bd.listar("productos").some((p) => p.codigo === "NEW01")).toBe(true);
   });
 
   it("no permite crear dos registros con el mismo identificador", () => {

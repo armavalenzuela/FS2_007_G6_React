@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { NavLink, Link, useNavigate } from "react-router-dom";
 import { useSesion } from "../context/SesionContext.jsx";
+import { useAuth } from "../context/AuthContext.jsx";
 import { useCarrito } from "../context/CarritoContext.jsx";
 
 const ENLACES = [
@@ -10,17 +11,32 @@ const ENLACES = [
   { ruta: "/contacto", texto: "Contacto" },
 ];
 
+function normalizarRol(usuarioAuth, usuarioSesion) {
+  if (usuarioAuth?.rol) {
+    const rol = usuarioAuth.rol.toLowerCase();
+    if (rol === "admin") return "administrador";
+    if (rol === "vendedor") return "vendedor";
+    if (rol === "cliente") return "cliente";
+    return rol;
+  }
+  return usuarioSesion?.tipo || null;
+}
+
 export default function Navbar() {
-  const { usuario, cerrarSesion } = useSesion();
+  const { usuario: usuarioSesion, cerrarSesion } = useSesion();
+  const { usuario: usuarioAuth, logout: logoutAuth } = useAuth();
   const { cantidadTotal } = useCarrito();
   const navegar = useNavigate();
   const [menuAbierto, setMenuAbierto] = useState(false);
 
+  const rol = normalizarRol(usuarioAuth, usuarioSesion);
+  const esPersonal = rol === "administrador" || rol === "vendedor";
+
   function salir() {
-    cerrarSesion();
+    try { cerrarSesion(); } catch (e) { /* ignore */ }
+    try { logoutAuth(); } catch (e) { /* ignore */ }
     navegar("/login");
   }
-  const esPersonal = usuario && (usuario.tipo === "administrador" || usuario.tipo === "vendedor");
 
   return (
     <nav className="navbar navbar-expand-lg navbar-mil-sabores sticky-top">
@@ -40,13 +56,14 @@ export default function Navbar() {
                 </NavLink>
               </li>
             ))}
-            {usuario ? (
-              <>{esPersonal && (
-                <li className="nav-item">
-                  <NavLink className="nav-link" to={usuario.tipo === "vendedor" ? "/admin/productos" : "/admin"} onClick={() => setMenuAbierto(false)}>Administración</NavLink>
-                </li>
-              )}
-                {usuario.tipo === "cliente" && (
+            {rol ? (
+              <>
+                {esPersonal && (
+                  <li className="nav-item">
+                    <NavLink className="nav-link" to={rol === "vendedor" ? "/admin/productos" : "/admin"} onClick={() => setMenuAbierto(false)}>Administración</NavLink>
+                  </li>
+                )}
+                {rol === "cliente" && (
                   <li className="nav-item">
                     <NavLink className="nav-link" to="/mi-cuenta" onClick={() => setMenuAbierto(false)}>Mi cuenta</NavLink>
                   </li>

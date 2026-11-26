@@ -16,12 +16,9 @@ function normalizarPedido(p) {
   return { ...p, envio: envio || {}, lineas: lineas || [] };
 }
 
-const ESTADOS = ["pagado", "preparacion", "en_camino", "cancelado"];
+const ESTADOS = ["pagado"];
 const CLASE_ESTADO = {
   pagado: "text-bg-success",
-  preparacion: "text-bg-primary",
-  en_camino: "text-bg-info",
-  cancelado: "text-bg-danger",
 };
 
 export function AdminPedidos() {

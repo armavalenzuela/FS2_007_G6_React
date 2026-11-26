@@ -39,7 +39,11 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/v1/usuarios/**").authenticated()
                 .requestMatchers(HttpMethod.PUT, "/api/v1/usuarios/**").authenticated()
                 .requestMatchers(HttpMethod.DELETE, "/api/v1/usuarios/**").hasRole("ADMIN")
+                .requestMatchers("/api/v1/carrito/**").authenticated()
                 .requestMatchers(HttpMethod.POST, "/api/v1/contactos/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/v1/contactos/**").authenticated()
+                .requestMatchers(HttpMethod.PUT, "/api/v1/pedidos/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/v1/contactos/**", "/api/v1/pedidos/**").hasRole("ADMIN")
                 .anyRequest().authenticated())
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
             .build();

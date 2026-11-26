@@ -36,11 +36,6 @@ function copiaProfunda(valor) {
 }
 
 function leerDesdeAlmacenamiento() {
-  try {
-    const guardado = localStorage.getItem(CLAVE_BD);
-    if (guardado) return JSON.parse(guardado);
-  } catch (error) {
-  }
   return copiaProfunda(DATOS_INICIALES);
 }
 
@@ -49,10 +44,6 @@ const suscriptores = new Set();
 
 function guardar(nuevoEstado) {
   estado = nuevoEstado;
-  try {
-    localStorage.setItem(CLAVE_BD, JSON.stringify(estado));
-  } catch (error) {
-  }
   suscriptores.forEach((notificar) => notificar());
 }
 
@@ -113,13 +104,4 @@ export function eliminar(coleccion, id) {
 
 export function reiniciarBaseDatos() {
   guardar(copiaProfunda(DATOS_INICIALES));
-}
-
-if (typeof window !== "undefined") {
-  window.addEventListener("storage", (evento) => {
-    if (evento.key === CLAVE_BD) {
-      estado = leerDesdeAlmacenamiento();
-      suscriptores.forEach((notificar) => notificar());
-    }
-  });
 }

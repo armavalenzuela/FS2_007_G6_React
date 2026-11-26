@@ -6,7 +6,6 @@ import { productoService } from "../../services/productoService.js";
 import { usuarioService } from "../../services/usuarioService.js";
 import { pedidoService } from "../../services/pedidoService.js";
 
-// Panel de inicio del administrador con métricas calculadas desde la base de datos
 export default function Dashboard() {
   const [productos, setProductos] = useState([]);
   const [usuarios, setUsuarios] = useState([]);

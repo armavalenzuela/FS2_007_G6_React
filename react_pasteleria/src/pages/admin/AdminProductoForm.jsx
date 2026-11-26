@@ -3,10 +3,8 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { productoService } from "../../services/productoService.js";
 import { CATEGORIAS_PRODUCTO, TIPO_POR_CATEGORIA } from "../../data/catalogos.js";
 
-// OJO: en tu proyecto las imágenes se sirven desde /img/productos/ (publicDir: "assets")
 const FORMATO_IMAGEN = (codigo) => `/img/productos/${codigo}.jpg`;
 
-// Crea o edita un producto. Sin :codigo => crear; con :codigo => editar.
 export default function AdminProductoForm() {
   const { codigo } = useParams();
   const navegar = useNavigate();

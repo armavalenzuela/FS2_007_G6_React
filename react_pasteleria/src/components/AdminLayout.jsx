@@ -3,11 +3,11 @@ import { useSesion } from "../context/SesionContext.jsx";
 import { useAuth } from "../context/AuthContext.jsx";
 import ProtectedRoute from "./ProtectedRoute.jsx";
 
-// Menú lateral del panel. El vendedor solo ve Productos.
 const MENU = [
     { ruta: "/admin", texto: "Inicio", fin: true, soloAdmin: true },
     { ruta: "/admin/productos", texto: "Productos" },
     { ruta: "/admin/usuarios", texto: "Usuarios", soloAdmin: true },
+    { ruta: "/admin/contactos", texto: "Contactos", soloAdmin: true },
     { ruta: "/admin/pedidos", texto: "Órdenes / boletas", soloAdmin: true },
 ];
 

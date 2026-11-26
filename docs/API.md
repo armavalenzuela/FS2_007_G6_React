@@ -2,6 +2,7 @@
 
 ## Autenticación
 - `POST /api/v1/auth/login`
+- `POST /api/v1/auth/refresh`
 
 ## Productos
 - `GET /api/v1/productos`
@@ -28,8 +29,12 @@
 - `GET /api/v1/contactos`
 - `GET /api/v1/contactos/{id}`
 - `POST /api/v1/contactos`
-- `PUT /api/v1/contactos/{id}`
 - `DELETE /api/v1/contactos/{id}`
+
+## Carrito
+- `GET /api/v1/carrito`
+- `PUT /api/v1/carrito`
+- `DELETE /api/v1/carrito`
 
 ## Swagger
 - `http://localhost:8080/swagger-ui/index.html`

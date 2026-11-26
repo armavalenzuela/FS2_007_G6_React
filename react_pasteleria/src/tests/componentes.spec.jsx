@@ -120,7 +120,6 @@ describe("Inicio de sesión", () => {
   let vista;
   beforeEach(() => {
     reiniciarBaseDatos();
-    localStorage.removeItem("usuarioCorreo");
   });
   afterEach(() => vista && vista.limpiar());
 

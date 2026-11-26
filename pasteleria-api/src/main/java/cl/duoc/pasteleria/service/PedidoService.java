@@ -55,7 +55,6 @@ public class PedidoService {
         pedido.setEstado(input.estado() == null || input.estado().isBlank() ? "pagado" : input.estado().strip());
         Pedido saved = repository.save(pedido);
 
-        // Descontar stock de los productos del pedido
         try {
             if (input.lineas() != null && !input.lineas().isBlank()) {
                 JsonNode node = objectMapper.readTree(input.lineas());

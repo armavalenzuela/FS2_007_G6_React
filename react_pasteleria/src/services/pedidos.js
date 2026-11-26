@@ -1,23 +1,11 @@
-import { crear } from "../data/baseDatos.js";
-import { validarStock } from "../data/reglasNegocio.js";
-
 export function generarNumeroPedido(ahora = Date.now()) {
   return "MS-" + String(ahora).slice(-8) + Math.floor(Math.random() * 90 + 10);
 }
 
 export function registrarPedido({ items, resumen, datosEnvio, usuario, metodoPago, codigoAutorizacion }) {
-  const productos = items.map((item) => obtener("productos", item.codigo)).filter(Boolean);
-  const problemas = validarStock(items, productos);
-  if (problemas.length > 0) {
-    throw new Error(`${problemas[0].motivo}. Actualiza tu carrito para continuar.`);
-  }
+  const numero = generarNumeroPedido();
 
-  let numero = generarNumeroPedido();
-  for (let intento = 0; intento < 5 && obtener("pedidos", numero); intento++) {
-    numero = generarNumeroPedido();
-  }
-
-  const pedido = crear("pedidos", {
+  const pedido = {
     numero,
     fecha: new Date().toISOString(),
     usuarioCorreo: usuario ? usuario.correo : null,
@@ -31,7 +19,7 @@ export function registrarPedido({ items, resumen, datosEnvio, usuario, metodoPag
     descuentoCodigo: resumen.descuentoCodigo,
     total: resumen.total,
     estado: "pagado",
-  });
+  };
 
   return pedido;
 }

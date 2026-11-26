@@ -1,40 +1,46 @@
-import { createContext, useContext, useMemo, useState } from "react";
-import { obtener } from "../data/baseDatos.js";
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { useAuth } from "./AuthContext.jsx";
+import { carritoService } from "../services/carritoService.js";
 
-const CLAVE_CARRITO = "carritoMilSabores";
 const CarritoContext = createContext(null);
 
-function leerCarrito() {
-  try {
-    const guardado = JSON.parse(localStorage.getItem(CLAVE_CARRITO)) || [];
-    return guardado.filter((i) => i && Number.isInteger(i.cantidad) && i.cantidad > 0);
-  } catch (error) {
-    return [];
-  }
-}
-
 export function CarritoProvider({ children }) {
-  const [items, setItems] = useState(leerCarrito);
+  const { usuario: usuarioAuth } = useAuth();
+  const [items, setItems] = useState([]);
+
+  useEffect(() => {
+    let activo = true;
+    async function cargar() {
+      if (!usuarioAuth?.correo) {
+        setItems([]);
+        return;
+      }
+      try {
+        const data = await carritoService.get();
+        if (!activo) return;
+        let parsed = [];
+        try { parsed = JSON.parse(data); } catch (e) { parsed = []; }
+        if (Array.isArray(parsed)) setItems(parsed.filter((i) => i && Number.isInteger(i.cantidad) && i.cantidad > 0));
+      } catch (e) {
+      }
+    }
+    cargar();
+    return () => { activo = false; };
+  }, [usuarioAuth?.correo]);
 
   function guardar(nuevos) {
-    localStorage.setItem(CLAVE_CARRITO, JSON.stringify(nuevos));
     setItems(nuevos);
+    if (usuarioAuth?.correo) {
+      carritoService.save(nuevos).catch(() => {});
+    }
   }
 
   function agregar(codigo, cantidad = 1) {
     if (!Number.isInteger(cantidad) || cantidad < 1) {
       return { ok: false, mensaje: "Cantidad inválida" };
     }
-    const producto = obtener("productos", codigo);
-    if (!producto) return { ok: false, mensaje: "Producto no encontrado" };
-    if (producto.stock <= 0) return { ok: false, mensaje: "Producto sin stock" };
-
     const actual = items.find((i) => i.codigo === codigo);
     const cantidadFinal = (actual ? actual.cantidad : 0) + cantidad;
-    if (cantidadFinal > producto.stock) {
-      return { ok: false, mensaje: `Solo quedan ${producto.stock} unidades de este producto` };
-    }
-
     const nuevos = actual
       ? items.map((i) => (i.codigo === codigo ? { ...i, cantidad: cantidadFinal } : i))
       : [...items, { codigo, cantidad }];
@@ -45,9 +51,7 @@ export function CarritoProvider({ children }) {
   function cambiarCantidad(codigo, cantidad) {
     if (!Number.isInteger(cantidad)) return;
     if (cantidad <= 0) return quitar(codigo);
-    const producto = obtener("productos", codigo);
-    const final = producto ? Math.min(cantidad, producto.stock) : cantidad;
-    guardar(items.map((i) => (i.codigo === codigo ? { ...i, cantidad: final } : i)));
+    guardar(items.map((i) => (i.codigo === codigo ? { ...i, cantidad } : i)));
   }
 
   function quitar(codigo) {
@@ -56,6 +60,7 @@ export function CarritoProvider({ children }) {
 
   function vaciar() {
     guardar([]);
+    if (usuarioAuth?.correo) carritoService.clear().catch(() => {});
   }
 
   const valor = useMemo(
@@ -67,7 +72,7 @@ export function CarritoProvider({ children }) {
       quitar,
       vaciar,
     }),
-    [items]
+    [items, usuarioAuth?.correo]
   );
 
   return <CarritoContext.Provider value={valor}>{children}</CarritoContext.Provider>;

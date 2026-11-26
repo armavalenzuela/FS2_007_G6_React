@@ -50,7 +50,9 @@ export default function AdminProductos() {
     <>
       <div className="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
         <h1 className="mb-0">Productos (API)</h1>
-        <Link to="/admin/productos/nuevo" className="btn btn-mil-sabores">+ Nuevo producto</Link>
+        {usuario?.rol === "ADMIN" && (
+          <Link to="/admin/productos/nuevo" className="btn btn-mil-sabores">+ Nuevo producto</Link>
+        )}
       </div>
 
       {error && <div className="alert alert-danger small py-2">{error}</div>}
@@ -82,7 +84,9 @@ export default function AdminProductos() {
                   <td>{formatoPesos(p.precio)}</td>
                   <td>{p.stock}</td>
                   <td className="text-end text-nowrap">
-                    <Link to={`/admin/productos/${p.codigo}/editar`} className="btn btn-sm btn-outline-mil-sabores me-1">Editar</Link>
+                    {usuario?.rol === "ADMIN" && (
+                      <Link to={`/admin/productos/${p.codigo}/editar`} className="btn btn-sm btn-outline-mil-sabores me-1">Editar</Link>
+                    )}
                     {usuario?.rol === "ADMIN" && (
                       <button className="btn btn-sm btn-danger" onClick={() => borrar(p)}>Eliminar</button>
                     )}

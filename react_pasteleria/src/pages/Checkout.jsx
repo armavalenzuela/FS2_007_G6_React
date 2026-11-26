@@ -99,7 +99,6 @@ export default function Checkout() {
           estado: pedido.estado,
         });
       } catch (error) {
-        // No bloquea la compra; el pedido queda en localStorage
       }
       vaciar();
       navegar(`/pedido/${pedido.numero}`);

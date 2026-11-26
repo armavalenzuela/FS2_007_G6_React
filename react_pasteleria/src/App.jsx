@@ -17,6 +17,7 @@ import Dashboard from "./pages/admin/Dashboard.jsx";
 import AdminProductos from "./pages/admin/AdminProductos.jsx";
 import AdminProductoForm from "./pages/admin/AdminProductoForm.jsx";
 import AdminUsuarios from "./pages/admin/AdminUsuarios.jsx";
+import AdminContactos from "./pages/admin/AdminContactos.jsx";
 import { AdminPedidos, HistorialUsuario } from "./pages/admin/AdminPedidos.jsx";
 
 function NoEncontrado() {
@@ -68,9 +69,10 @@ export default function App() {
       <Route path="admin" element={<AdminLayout />}>
         <Route index element={<ProtectedRoute roles={["administrador"]}><Dashboard /></ProtectedRoute>} />
         <Route path="productos" element={<AdminProductos />} />
-        <Route path="productos/nuevo" element={<AdminProductoForm />} />
-        <Route path="productos/:codigo/editar" element={<AdminProductoForm />} />
+        <Route path="productos/nuevo" element={<ProtectedRoute roles={["administrador"]}><AdminProductoForm /></ProtectedRoute>} />
+        <Route path="productos/:codigo/editar" element={<ProtectedRoute roles={["administrador"]}><AdminProductoForm /></ProtectedRoute>} />
         <Route path="usuarios" element={<ProtectedRoute roles={["administrador"]}><AdminUsuarios /></ProtectedRoute>} />
+        <Route path="contactos" element={<ProtectedRoute roles={["administrador"]}><AdminContactos /></ProtectedRoute>} />
         <Route path="usuarios/:correo/historial" element={<ProtectedRoute roles={["administrador"]}><HistorialUsuario /></ProtectedRoute>} />
         <Route path="pedidos" element={<ProtectedRoute roles={["administrador"]}><AdminPedidos /></ProtectedRoute>} />
       </Route>

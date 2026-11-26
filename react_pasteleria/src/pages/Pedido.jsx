@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useSesion } from "../context/SesionContext.jsx";
+import { useAuth } from "../context/AuthContext.jsx";
 import { formatoPesos } from "../utils/formato.js";
 import { pedidoService } from "../services/pedidoService.js";
 
@@ -21,14 +22,15 @@ function normalizarPedido(p) {
 
 export default function Pedido() {
   const { numero } = useParams();
-  const { usuario } = useSesion();
+  const { usuario: usuarioSesion } = useSesion();
+  const { usuario: usuarioAuth } = useAuth();
+  const usuario = usuarioSesion || (usuarioAuth ? { tipo: usuarioAuth.rol === "ADMIN" ? "administrador" : usuarioAuth.rol === "VENDEDOR" ? "vendedor" : "cliente", correo: usuarioAuth.correo } : null);
   const [pedido, setPedido] = useState(null);
   const [cargando, setCargando] = useState(true);
 
   useEffect(() => {
     let activo = true;
     async function cargar() {
-      // Buscar en backend
       try {
         const remoto = await pedidoService.findByNumero(numero);
         if (activo) setPedido(normalizarPedido(remoto));

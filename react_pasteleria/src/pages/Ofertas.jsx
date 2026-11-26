@@ -4,7 +4,6 @@ import Alerta from "../components/Alerta.jsx";
 import { useState, useEffect } from "react";
 import { productoService } from "../services/productoService.js";
 
-// Muestra solo los productos que están en oferta
 export default function Ofertas() {
   const [productos, setProductos] = useState([]);
   const { agregar } = useCarrito();

@@ -13,7 +13,7 @@ function sinContrasena(usuario) {
 
 export function SesionProvider({ children }) {
   const usuarios = useColeccion("usuarios");
-  const [correoSesion, setCorreoSesion] = useState(() => localStorage.getItem(CLAVE_CORREO));
+  const [correoSesion, setCorreoSesion] = useState(() => null);
 
   const usuario = useMemo(() => {
     if (!correoSesion) return null;
@@ -21,12 +21,10 @@ export function SesionProvider({ children }) {
   }, [usuarios, correoSesion]);
 
   function iniciarSesion(correo) {
-    localStorage.setItem(CLAVE_CORREO, correo);
     setCorreoSesion(correo);
   }
 
   function cerrarSesion() {
-    localStorage.removeItem(CLAVE_CORREO);
     setCorreoSesion(null);
   }
 
