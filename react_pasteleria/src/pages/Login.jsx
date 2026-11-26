@@ -1,13 +1,13 @@
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { useSesion } from "../context/SesionContext.jsx";
+import { normalizarRol } from "../utils/roles.js";
+import { getErrorMessage } from "../utils/getErrorMessage.js";
 import { useAuth } from "../context/AuthContext.jsx";
 import { validarLogin } from "../utils/validaciones.js";
 
 const DESTINOS = { administrador: "/admin", vendedor: "/admin/productos", cliente: "/mi-cuenta" };
 
 export default function Login() {
-  const { login: loginSesion } = useSesion();
   const { login: loginAuth } = useAuth();
   const navegar = useNavigate();
   const ubicacion = useLocation();
@@ -24,18 +24,13 @@ export default function Login() {
 
     try {
       const respuesta = await loginAuth(form.correo, form.contrasena);
-      const tipo = respuesta.rol === "ADMIN" ? "administrador" : respuesta.rol === "VENDEDOR" ? "vendedor" : "cliente";
+      const tipo = normalizarRol(respuesta.rol);
       const destino = ubicacion.state?.desde || DESTINOS[tipo] || "/mi-cuenta";
       navegar(destino, { replace: true });
-      return;
     } catch (error) {
-      const usuario = loginSesion(form.correo, form.contrasena);
-      if (!usuario) {
-        setErrorGeneral("Correo o contraseña incorrectos.");
-        return;
-      }
-      const destino = ubicacion.state?.desde || DESTINOS[usuario.tipo] || "/mi-cuenta";
-      navegar(destino, { replace: true });
+      setErrorGeneral(error.response?.status === 401 || error.response?.status === 403
+        ? "Correo o contraseña incorrectos."
+        : getErrorMessage(error));
     }
   }
 

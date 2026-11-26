@@ -4,6 +4,7 @@ import cl.duoc.pasteleria.dto.UsuarioRequest;
 import cl.duoc.pasteleria.model.Usuario;
 import cl.duoc.pasteleria.repository.UsuarioRepository;
 import java.util.List;
+import java.util.Locale;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,17 +28,35 @@ public class UsuarioService {
             new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
     }
 
+    public Usuario findByCorreo(String correo) {
+        return repository.findByCorreoIgnoreCase(correo).orElseThrow(() ->
+            new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
+    }
+
+    @Transactional
+    public Usuario actualizarPerfil(String correo, String fechaNacimiento, String telefono, String codigoPromocional) {
+        Usuario usuario = findByCorreo(correo);
+        if (fechaNacimiento != null) usuario.setFechaNacimiento(fechaNacimiento);
+        if (telefono != null) usuario.setTelefono(telefono);
+        aplicarCodigo(usuario, codigoPromocional);
+        return repository.save(usuario);
+    }
+
     @Transactional
     public Usuario create(UsuarioRequest input) {
+        String correo = input.correo().strip().toLowerCase(Locale.ROOT);
+        if (repository.findByCorreoIgnoreCase(correo).isPresent()) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Ya hay una cuenta con ese correo.");
+        }
         Usuario usuario = new Usuario(
-            input.correo().strip().toLowerCase(),
+            correo,
             input.nombre().strip(),
             input.contrasena(),
             input.tipo() == null || input.tipo().isBlank() ? "cliente" : input.tipo().strip()
         );
         usuario.setFechaNacimiento(input.fechaNacimiento());
         usuario.setTelefono(input.telefono());
-        usuario.setCodigoFelices50Aplicado(input.codigoFelices50Aplicado() == null ? false : input.codigoFelices50Aplicado());
+        aplicarCodigo(usuario, input.codigoPromocional());
         return repository.save(usuario);
     }
 
@@ -50,8 +69,16 @@ public class UsuarioService {
         usuario.setTipo(input.tipo() == null || input.tipo().isBlank() ? usuario.getTipo() : input.tipo().strip());
         usuario.setFechaNacimiento(input.fechaNacimiento());
         usuario.setTelefono(input.telefono());
-        usuario.setCodigoFelices50Aplicado(input.codigoFelices50Aplicado() == null ? false : input.codigoFelices50Aplicado());
+        aplicarCodigo(usuario, input.codigoPromocional());
         return repository.save(usuario);
+    }
+
+    private void aplicarCodigo(Usuario usuario, String codigoPromocional) {
+        if (codigoPromocional == null || codigoPromocional.isBlank()) return;
+        if (!"FELICES50".equalsIgnoreCase(codigoPromocional.strip())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El código ingresado no es válido.");
+        }
+        usuario.setCodigoFelices50Aplicado(true);
     }
 
     @Transactional

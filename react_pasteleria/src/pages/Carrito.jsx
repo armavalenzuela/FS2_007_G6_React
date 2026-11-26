@@ -1,9 +1,11 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useCarrito } from "../context/CarritoContext.jsx";
-import { useSesion } from "../context/SesionContext.jsx";
-import { calcularTotales, validarStock, precioUnitario } from "../data/reglasNegocio.js";
+import { useAuth } from "../context/AuthContext.jsx";
+import { validarStock } from "../data/reglasNegocio.js";
+import { useResumenCarrito } from "../hooks/useResumenCarrito.js";
 import { formatoPesos } from "../utils/formato.js";
 import ImagenProducto from "../components/ImagenProducto.jsx";
+import DescuentosResumen from "../components/DescuentosResumen.jsx";
 import Alerta from "../components/Alerta.jsx";
 import { useState, useEffect } from "react";
 import { productoService } from "../services/productoService.js";
@@ -11,15 +13,14 @@ import { productoService } from "../services/productoService.js";
 export default function Carrito() {
   const [productos, setProductos] = useState([]);
   const { items, cambiarCantidad, quitar, vaciar } = useCarrito();
-  const { usuario } = useSesion();
+  const { usuario } = useAuth();
+  const { resumen, error: errorResumen, cargando: cargandoResumen } = useResumenCarrito(items);
   const navegar = useNavigate();
   const [aviso, setAviso] = useState(null);
 
   useEffect(() => {
     productoService.list().then(setProductos).catch(() => setProductos([]));
   }, []);
-
-  const resumen = calcularTotales(items, productos, usuario);
 
   function continuar() {
     const problemas = validarStock(items, productos);
@@ -50,6 +51,7 @@ export default function Carrito() {
                 <div className="card-producto carrito-lista p-3 p-md-4 sombra-suave">
                   {items.map((item) => {
                     const producto = productos.find((p) => p.codigo === item.codigo);
+                    const linea = resumen?.lineas.find((l) => l.codigo === item.codigo);
                     if (!producto) {
                       return (
                         <div key={item.codigo} className="carrito-linea d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-3">
@@ -69,7 +71,7 @@ export default function Carrito() {
                           </div>
                           <div className="carrito-texto">
                             <h6 className="mb-1 text-break">{producto.nombre}</h6>
-                            <p className="small texto-secundario mb-0">{formatoPesos(precioUnitario(producto))} c/u</p>
+                            {linea && <p className="small texto-secundario mb-0">{formatoPesos(linea.precioUnitario)} c/u</p>}
                           </div>
                         </div>
                         <div className="d-flex align-items-center gap-2 align-self-end align-self-sm-auto">
@@ -95,24 +97,22 @@ export default function Carrito() {
             <div className="col-lg-4">
               <div className="card-producto p-4 sombra-suave">
                 <h5 className="mb-3">Resumen del pedido</h5>
-                <div className="d-flex justify-content-between mb-2"><span>Subtotal</span><span>{formatoPesos(resumen.subtotal)}</span></div>
-                {resumen.descuentoTortaDuoc > 0 && (
-                  <div className="d-flex justify-content-between mb-2 texto-secundario"><span>Torta de cumpleaños Duoc</span><span>-{formatoPesos(resumen.descuentoTortaDuoc)}</span></div>
+                {cargandoResumen && <p className="small texto-secundario">Calculando descuentos...</p>}
+                <Alerta tipo="danger">{errorResumen}</Alerta>
+                {resumen && (
+                  <>
+                    <div className="d-flex justify-content-between mb-2"><span>Subtotal</span><span>{formatoPesos(resumen.subtotal)}</span></div>
+                    <DescuentosResumen resumen={resumen} />
+                    <hr />
+                    <div className="d-flex justify-content-between fs-5 fw-bold mb-3"><span>Total</span><span>{formatoPesos(resumen.total)}</span></div>
+                  </>
                 )}
-                {resumen.descuentoEdad > 0 && (
-                  <div className="d-flex justify-content-between mb-2 texto-secundario"><span>Descuento 50% por edad</span><span>-{formatoPesos(resumen.descuentoEdad)}</span></div>
-                )}
-                {resumen.descuentoCodigo > 0 && (
-                  <div className="d-flex justify-content-between mb-2 texto-secundario"><span>Código FELICES50 (10%)</span><span>-{formatoPesos(resumen.descuentoCodigo)}</span></div>
-                )}
-                <hr />
-                <div className="d-flex justify-content-between fs-5 fw-bold mb-3"><span>Total</span><span>{formatoPesos(resumen.total)}</span></div>
                 {!usuario && (
                   <p className="small texto-secundario">
                     ¿Tienes 50 años o más, o un código de descuento? <Link to="/registro">Regístrate</Link> para aplicar tu descuento automáticamente.
                   </p>
                 )}
-                <button className="btn btn-mil-sabores btn-lg w-100" disabled={items.length === 0} onClick={continuar}>
+                <button className="btn btn-mil-sabores btn-lg w-100" disabled={items.length === 0 || !resumen} onClick={continuar}>
                   Continuar con el pedido
                 </button>
               </div>

@@ -9,7 +9,12 @@ import { SesionProvider } from "../context/SesionContext.jsx";
 import { AuthProvider } from "../context/AuthContext.jsx";
 import { vi } from "vitest";
 vi.mock("../services/authService", () => ({
-  authService: { login: vi.fn().mockRejectedValue(new Error("sin backend")) },
+  authService: {
+    login: vi.fn().mockImplementation(async (correo) => ({
+      rol: "ADMIN",
+      token: "test." + btoa(JSON.stringify({ sub: correo, role: "ADMIN" })) + ".test",
+    })),
+  },
 }));
 vi.mock("../services/contactoService", () => ({
   contactoService: { create: vi.fn().mockResolvedValue({ id: 1 }) },
@@ -125,16 +130,14 @@ describe("Inicio de sesión", () => {
 
   it("redirige al administrador al dashboard", async () => {
     vista = montar(
-      <SesionProvider>
-        <AuthProvider>
-          <MemoryRouter initialEntries={["/login"]}>
-            <Routes>
-              <Route path="/login" element={<Login />} />
-              <Route path="/admin" element={<p>Dashboard de administración</p>} />
-            </Routes>
-          </MemoryRouter>
-        </AuthProvider>
-      </SesionProvider>
+      <AuthProvider>
+        <MemoryRouter initialEntries={["/login"]}>
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route path="/admin" element={<p>Dashboard de administración</p>} />
+          </Routes>
+        </MemoryRouter>
+      </AuthProvider>
     );
 
     escribir(vista.contenedor.querySelector("#loginCorreo"), "admin@duoc.cl");

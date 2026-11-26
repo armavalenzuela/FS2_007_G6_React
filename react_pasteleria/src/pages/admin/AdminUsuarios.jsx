@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { usuarioService } from "../../services/usuarioService.js";
 import { useAuth } from "../../context/AuthContext.jsx";
+import { normalizarRol } from "../../utils/roles.js";
 import { getErrorMessage } from "../../utils/getErrorMessage.js";
 
 const TIPOS = ["cliente", "vendedor", "administrador"];
@@ -60,7 +61,7 @@ export default function AdminUsuarios() {
                 <td>{u.nombre}</td>
                 <td>{u.correo}</td>
                 <td>
-                  <select className="form-select form-select-sm" value={u.tipo} disabled={u.correo === sesion?.correo}
+                  <select className="form-select form-select-sm" value={normalizarRol(u.tipo)} disabled={u.correo === sesion?.correo}
                     onChange={(e) => cambiarTipo(u, e.target.value)}>
                     {TIPOS.map((t) => <option key={t}>{t}</option>)}
                   </select>

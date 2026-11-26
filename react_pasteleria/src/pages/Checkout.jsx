@@ -1,23 +1,27 @@
-import { useMemo, useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useCarrito } from "../context/CarritoContext.jsx";
-import { useSesion } from "../context/SesionContext.jsx";
+import { useAuth } from "../context/AuthContext.jsx";
+import { useResumenCarrito } from "../hooks/useResumenCarrito.js";
 import { productoService } from "../services/productoService.js";
-import { calcularTotales, validarStock } from "../data/reglasNegocio.js";
+import { validarStock } from "../data/reglasNegocio.js";
 import { validarDireccion } from "../utils/validaciones.js";
 import { formatoPesos } from "../utils/formato.js";
 import { METODOS_PAGO, procesarPago } from "../services/pagos.js";
-import { registrarPedido } from "../services/pedidos.js";
+import { generarNumeroPedido } from "../services/pedidos.js";
 import { pedidoService } from "../services/pedidoService.js";
+import { usuarioService } from "../services/usuarioService.js";
+import { getErrorMessage } from "../utils/getErrorMessage.js";
+import DescuentosResumen from "../components/DescuentosResumen.jsx";
 import Alerta from "../components/Alerta.jsx";
-import { CLAVE_ULTIMO_PEDIDO } from "./Pedido.jsx";
 
 const HORARIOS = ["Mañana (9:00 - 13:00)", "Tarde (14:00 - 18:00)", "Noche (18:00 - 21:00)"];
 
 export default function Checkout() {
   const [productos, setProductos] = useState([]);
   const { items, vaciar } = useCarrito();
-  const { usuario } = useSesion();
+  const { usuario } = useAuth();
+  const { resumen, error: errorResumen, cargando: cargandoResumen } = useResumenCarrito(items);
   const navegar = useNavigate();
 
   useEffect(() => {
@@ -25,10 +29,10 @@ export default function Checkout() {
   }, []);
 
   const [form, setForm] = useState({
-    nombre: usuario?.nombre || "",
+    nombre: "",
     apellidos: "",
     correo: usuario?.correo || "",
-    telefono: usuario?.telefono || "",
+    telefono: "",
     calle: "",
     departamento: "",
     region: "Región Metropolitana de Santiago",
@@ -42,7 +46,21 @@ export default function Checkout() {
   const [errorGeneral, setErrorGeneral] = useState("");
   const [procesando, setProcesando] = useState(false);
 
-  const resumen = useMemo(() => calcularTotales(items, productos, usuario), [items, productos, usuario]);
+  useEffect(() => {
+    if (!usuario?.correo) return;
+    let activo = true;
+    usuarioService.perfil().then((perfil) => {
+      if (!activo) return;
+      setForm((actual) => ({
+        ...actual,
+        nombre: actual.nombre || perfil.nombre,
+        correo: actual.correo || perfil.correo,
+        telefono: actual.telefono || perfil.telefono || "",
+      }));
+    }).catch(() => {});
+    return () => { activo = false; };
+  }, [usuario?.correo]);
+
   function cambiar(e) {
     const { name, value } = e.target;
     setForm((anterior) => ({ ...anterior, [name]: value, ...(name === "region" ? { comuna: "" } : {}) }));
@@ -55,6 +73,7 @@ export default function Checkout() {
       setErrorGeneral("Tu carrito está vacío, agrega productos antes de continuar.");
       return;
     }
+    if (!resumen) return;
     const nuevosErrores = validarDireccion(form);
     setErrores(nuevosErrores);
     if (Object.keys(nuevosErrores).length > 0) return;
@@ -73,37 +92,21 @@ export default function Checkout() {
         return;
       }
 
-      const pedido = registrarPedido({
-        items,
-        resumen,
-        usuario,
+      const pedido = await pedidoService.create({
+        numero: generarNumeroPedido(),
+        correoCliente: (usuario?.correo || form.correo).trim().toLowerCase(),
+        fecha: new Date().toISOString(),
+        envio: JSON.stringify(form),
         metodoPago: form.metodoPago,
         codigoAutorizacion: respuesta.codigoAutorizacion,
-        datosEnvio: { ...form },
+        lineas: JSON.stringify(items),
+        total: resumen.total,
+        estado: "pagado",
       });
-      sessionStorage.setItem(CLAVE_ULTIMO_PEDIDO, pedido.numero);
-      try {
-        await pedidoService.create({
-          numero: pedido.numero,
-          correoCliente: (usuario ? usuario.correo : form.correo).trim().toLowerCase(),
-          fecha: pedido.fecha,
-          envio: JSON.stringify(pedido.envio),
-          metodoPago: pedido.metodoPago,
-          codigoAutorizacion: pedido.codigoAutorizacion,
-          lineas: JSON.stringify(pedido.lineas),
-          subtotal: pedido.subtotal,
-          descuentoTortaDuoc: pedido.descuentoTortaDuoc,
-          descuentoEdad: pedido.descuentoEdad,
-          descuentoCodigo: pedido.descuentoCodigo,
-          total: pedido.total,
-          estado: pedido.estado,
-        });
-      } catch (error) {
-      }
       vaciar();
-      navegar(`/pedido/${pedido.numero}`);
+      navegar(`/pedido/${pedido.numero}`, { state: { compraConfirmada: pedido.numero } });
     } catch (error) {
-      setErrorGeneral(error.message || "No se pudo registrar el pedido, intenta nuevamente.");
+      setErrorGeneral(getErrorMessage(error));
     } finally {
       setProcesando(false);
     }
@@ -211,8 +214,8 @@ export default function Checkout() {
                 </div>
 
                 <Alerta tipo="danger">{errorGeneral}</Alerta>
-                <button type="submit" className="btn btn-mil-sabores btn-lg w-100 mt-4" disabled={procesando}>
-                  {procesando ? "Procesando pago..." : `Pagar ahora ${formatoPesos(resumen.total)}`}
+                <button type="submit" className="btn btn-mil-sabores btn-lg w-100 mt-4" disabled={procesando || !resumen}>
+                  {procesando ? "Procesando pago..." : resumen ? `Pagar ahora ${formatoPesos(resumen.total)}` : "Pagar ahora"}
                 </button>
               </form>
             </div>
@@ -220,19 +223,23 @@ export default function Checkout() {
             <div className="col-lg-5">
               <div className="card-producto p-4 sombra-suave">
                 <h5 className="mb-3">Resumen</h5>
-                {resumen.lineas.map((l) => (
-                  <div key={l.codigo} className="d-flex justify-content-between small mb-1">
-                    <span>{l.cantidad} x {l.nombre}</span><span>{formatoPesos(l.subtotal)}</span>
-                  </div>
-                ))}
-                <hr />
-                <div className="d-flex justify-content-between mb-2"><span>Subtotal</span><span>{formatoPesos(resumen.subtotal)}</span></div>
-                {resumen.totalDescuentos > 0 && (
-                  <div className="d-flex justify-content-between mb-2 texto-secundario"><span>Descuentos</span><span>-{formatoPesos(resumen.totalDescuentos)}</span></div>
+                {cargandoResumen && <p className="small texto-secundario">Calculando descuentos...</p>}
+                <Alerta tipo="danger">{errorResumen}</Alerta>
+                {resumen && (
+                  <>
+                    {resumen.lineas.map((l) => (
+                      <div key={l.codigo} className="d-flex justify-content-between small mb-1">
+                        <span>{l.cantidad} x {l.nombre}</span><span>{formatoPesos(l.subtotalLista)}</span>
+                      </div>
+                    ))}
+                    <hr />
+                    <div className="d-flex justify-content-between mb-2"><span>Subtotal</span><span>{formatoPesos(resumen.subtotal)}</span></div>
+                    <DescuentosResumen resumen={resumen} />
+                    <div className="d-flex justify-content-between mb-2"><span>Envío</span><span>Gratis</span></div>
+                    <hr />
+                    <div className="d-flex justify-content-between fs-5 fw-bold"><span>Total</span><span>{formatoPesos(resumen.total)}</span></div>
+                  </>
                 )}
-                <div className="d-flex justify-content-between mb-2"><span>Envío</span><span>Gratis</span></div>
-                <hr />
-                <div className="d-flex justify-content-between fs-5 fw-bold"><span>Total</span><span>{formatoPesos(resumen.total)}</span></div>
               </div>
               {usuario && <p className="small texto-secundario mt-2">Tus datos se completaron desde tu cuenta.</p>}
             </div>

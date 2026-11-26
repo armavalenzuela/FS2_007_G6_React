@@ -1,7 +1,7 @@
 import { NavLink, Link, Outlet, useNavigate } from "react-router-dom";
-import { useSesion } from "../context/SesionContext.jsx";
 import { useAuth } from "../context/AuthContext.jsx";
 import ProtectedRoute from "./ProtectedRoute.jsx";
+import { normalizarRol } from "../utils/roles.js";
 
 const MENU = [
     { ruta: "/admin", texto: "Inicio", fin: true, soloAdmin: true },
@@ -20,14 +20,12 @@ export default function AdminLayout() {
 }
 
 function Shell() {
-    const { usuario: usuarioSesion, cerrarSesion } = useSesion();
     const { usuario: usuarioAuth, logout: logoutAuth } = useAuth();
     const navegar = useNavigate();
-    const esAdmin = usuarioSesion?.tipo === "administrador" || usuarioAuth?.rol === "ADMIN";
+    const esAdmin = normalizarRol(usuarioAuth?.rol) === "administrador";
 
     function salir() {
-        try { cerrarSesion(); } catch (e) { /* ignore */ }
-        try { logoutAuth(); } catch (e) { /* ignore */ }
+        logoutAuth();
         navegar("/login");
     }
 

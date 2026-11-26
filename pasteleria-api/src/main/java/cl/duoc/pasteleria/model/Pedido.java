@@ -37,6 +37,9 @@ public class Pedido {
     private BigDecimal descuentoTortaDuoc;
 
     @Column(precision = 12, scale = 2)
+    private BigDecimal descuentoOferta;
+
+    @Column(precision = 12, scale = 2)
     private BigDecimal descuentoEdad;
 
     @Column(precision = 12, scale = 2)
@@ -66,6 +69,7 @@ public class Pedido {
     public String getLineas() { return lineas; }
     public BigDecimal getSubtotal() { return subtotal; }
     public BigDecimal getDescuentoTortaDuoc() { return descuentoTortaDuoc; }
+    public BigDecimal getDescuentoOferta() { return descuentoOferta; }
     public BigDecimal getDescuentoEdad() { return descuentoEdad; }
     public BigDecimal getDescuentoCodigo() { return descuentoCodigo; }
     public BigDecimal getTotal() { return total; }
@@ -80,6 +84,7 @@ public class Pedido {
     public void setLineas(String lineas) { this.lineas = lineas; }
     public void setSubtotal(BigDecimal subtotal) { this.subtotal = subtotal; }
     public void setDescuentoTortaDuoc(BigDecimal descuentoTortaDuoc) { this.descuentoTortaDuoc = descuentoTortaDuoc; }
+    public void setDescuentoOferta(BigDecimal descuentoOferta) { this.descuentoOferta = descuentoOferta; }
     public void setDescuentoEdad(BigDecimal descuentoEdad) { this.descuentoEdad = descuentoEdad; }
     public void setDescuentoCodigo(BigDecimal descuentoCodigo) { this.descuentoCodigo = descuentoCodigo; }
     public void setTotal(BigDecimal total) { this.total = total; }

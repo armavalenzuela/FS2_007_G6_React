@@ -1,11 +1,9 @@
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
-import { useSesion } from "../context/SesionContext.jsx";
+import { Link, useLocation, useParams } from "react-router-dom";
+import { normalizarRol } from "../utils/roles.js";
 import { useAuth } from "../context/AuthContext.jsx";
 import { formatoPesos } from "../utils/formato.js";
 import { pedidoService } from "../services/pedidoService.js";
-
-export const CLAVE_ULTIMO_PEDIDO = "ultimoPedidoMilSabores";
 
 function normalizarPedido(p) {
   if (!p) return null;
@@ -22,9 +20,8 @@ function normalizarPedido(p) {
 
 export default function Pedido() {
   const { numero } = useParams();
-  const { usuario: usuarioSesion } = useSesion();
-  const { usuario: usuarioAuth } = useAuth();
-  const usuario = usuarioSesion || (usuarioAuth ? { tipo: usuarioAuth.rol === "ADMIN" ? "administrador" : usuarioAuth.rol === "VENDEDOR" ? "vendedor" : "cliente", correo: usuarioAuth.correo } : null);
+  const { usuario } = useAuth();
+  const ubicacion = useLocation();
   const [pedido, setPedido] = useState(null);
   const [cargando, setCargando] = useState(true);
 
@@ -46,9 +43,9 @@ export default function Pedido() {
 
   if (cargando) return <section className="seccion text-center"><div className="container"><p>Cargando pedido...</p></div></section>;
 
-  const esAdmin = usuario?.tipo === "administrador";
+  const esAdmin = normalizarRol(usuario?.rol) === "administrador";
   const esDueno = Boolean(usuario && pedido && pedido.correoCliente === usuario.correo);
-  const esReciente = sessionStorage.getItem(CLAVE_ULTIMO_PEDIDO) === numero;
+  const esReciente = ubicacion.state?.compraConfirmada === numero;
 
   if (!pedido || (!esAdmin && !esDueno && !esReciente)) {
     return (
@@ -85,7 +82,11 @@ export default function Pedido() {
               <tbody>
                 {(pedido.lineas || []).map((l) => (
                   <tr key={l.codigo}>
-                    <td>{l.nombre}</td><td>{formatoPesos(l.precioUnitario)}</td><td>{l.cantidad}</td><td>{formatoPesos(l.subtotal)}</td>
+                    <td>{l.nombre}</td>
+                    <td>
+                      {l.precioLista > l.precioUnitario && <del className="texto-secundario me-2">{formatoPesos(l.precioLista)}</del>}
+                      {formatoPesos(l.precioUnitario)}
+                    </td><td>{l.cantidad}</td><td>{formatoPesos(l.subtotal)}</td>
                   </tr>
                 ))}
               </tbody>

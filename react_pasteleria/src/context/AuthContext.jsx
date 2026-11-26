@@ -11,7 +11,9 @@ function leerToken() {
 function decodificar(token) {
   if (!token) return null;
   try {
-    const payload = JSON.parse(atob(token.split(".")[1]));
+    const payloadBase64 = token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
+    const bytes = Uint8Array.from(atob(payloadBase64), (caracter) => caracter.charCodeAt(0));
+    const payload = JSON.parse(new TextDecoder().decode(bytes));
     return { correo: payload.sub, rol: payload.role, exp: payload.exp };
   } catch (error) {
     return null;
@@ -28,9 +30,14 @@ export function AuthProvider({ children }) {
   const timerRef = useRef(null);
 
   useEffect(() => {
-    if (token) sessionStorage.setItem(CLAVE_TOKEN, token);
+    sessionStorage.removeItem("ultimoPedidoMilSabores");
+  }, []);
+
+  function guardarToken(nuevoToken) {
+    if (nuevoToken) sessionStorage.setItem(CLAVE_TOKEN, nuevoToken);
     else sessionStorage.removeItem(CLAVE_TOKEN);
-  }, [token]);
+    setToken(nuevoToken);
+  }
 
   // Renovacion automatica del JWT antes de que expire.
   useEffect(() => {
@@ -42,9 +49,9 @@ export function AuthProvider({ children }) {
     timerRef.current = setTimeout(async () => {
       try {
         const r = await authService.refresh();
-        if (r?.token) setToken(r.token);
+        if (r?.token && leerToken() === token) guardarToken(r.token);
       } catch (e) {
-        setToken(null);
+        if (leerToken() === token) guardarToken(null);
       }
     }, msAntes);
     return () => { if (timerRef.current) clearTimeout(timerRef.current); };
@@ -52,19 +59,19 @@ export function AuthProvider({ children }) {
 
   async function login(correo, contrasena) {
     const respuesta = await authService.login(correo, contrasena);
-    setToken(respuesta.token);
+    guardarToken(respuesta.token);
     return respuesta;
   }
 
   async function refresh() {
     if (!token) return null;
     const respuesta = await authService.refresh();
-    if (respuesta?.token) setToken(respuesta.token);
+    if (respuesta?.token && leerToken() === token) guardarToken(respuesta.token);
     return respuesta;
   }
 
   function logout() {
-    setToken(null);
+    guardarToken(null);
   }
 
   return (

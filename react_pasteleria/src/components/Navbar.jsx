@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { NavLink, Link, useNavigate } from "react-router-dom";
-import { useSesion } from "../context/SesionContext.jsx";
+import { normalizarRol } from "../utils/roles.js";
 import { useAuth } from "../context/AuthContext.jsx";
 import { useCarrito } from "../context/CarritoContext.jsx";
 
@@ -11,30 +11,17 @@ const ENLACES = [
   { ruta: "/contacto", texto: "Contacto" },
 ];
 
-function normalizarRol(usuarioAuth, usuarioSesion) {
-  if (usuarioAuth?.rol) {
-    const rol = usuarioAuth.rol.toLowerCase();
-    if (rol === "admin") return "administrador";
-    if (rol === "vendedor") return "vendedor";
-    if (rol === "cliente") return "cliente";
-    return rol;
-  }
-  return usuarioSesion?.tipo || null;
-}
-
 export default function Navbar() {
-  const { usuario: usuarioSesion, cerrarSesion } = useSesion();
   const { usuario: usuarioAuth, logout: logoutAuth } = useAuth();
   const { cantidadTotal } = useCarrito();
   const navegar = useNavigate();
   const [menuAbierto, setMenuAbierto] = useState(false);
 
-  const rol = normalizarRol(usuarioAuth, usuarioSesion);
+  const rol = normalizarRol(usuarioAuth?.rol);
   const esPersonal = rol === "administrador" || rol === "vendedor";
 
   function salir() {
-    try { cerrarSesion(); } catch (e) { /* ignore */ }
-    try { logoutAuth(); } catch (e) { /* ignore */ }
+    logoutAuth();
     navegar("/login");
   }
 

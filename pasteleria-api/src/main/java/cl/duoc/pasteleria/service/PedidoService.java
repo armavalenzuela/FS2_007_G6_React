@@ -2,12 +2,14 @@ package cl.duoc.pasteleria.service;
 
 import cl.duoc.pasteleria.dto.PedidoRequest;
 import cl.duoc.pasteleria.model.Pedido;
-import cl.duoc.pasteleria.model.Producto;
 import cl.duoc.pasteleria.repository.PedidoRepository;
-import cl.duoc.pasteleria.repository.ProductoRepository;
-import com.fasterxml.jackson.databind.JsonNode;
+import cl.duoc.pasteleria.service.ResumenCarritoService.Item;
+import cl.duoc.pasteleria.service.ResumenCarritoService.Resumen;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
+import java.util.Locale;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,17 +19,22 @@ import org.springframework.web.server.ResponseStatusException;
 @Transactional(readOnly = true)
 public class PedidoService {
     private final PedidoRepository repository;
-    private final ProductoRepository productoRepository;
     private final ObjectMapper objectMapper;
 
-    public PedidoService(PedidoRepository repository, ProductoRepository productoRepository, ObjectMapper objectMapper) {
+    private final ResumenCarritoService resumenService;
+
+    public PedidoService(PedidoRepository repository, ObjectMapper objectMapper, ResumenCarritoService resumenService) {
         this.repository = repository;
-        this.productoRepository = productoRepository;
         this.objectMapper = objectMapper;
+        this.resumenService = resumenService;
     }
 
     public List<Pedido> list() {
         return repository.findAll();
+    }
+
+    public List<Pedido> historial(String correo) {
+        return repository.findByCorreoClienteIgnoreCaseOrderByFechaDesc(correo.strip());
     }
 
     public Pedido find(Long id) {
@@ -41,43 +48,41 @@ public class PedidoService {
     }
 
     @Transactional
-    public Pedido create(PedidoRequest input) {
-        Pedido pedido = new Pedido(input.numero().strip(), input.correoCliente().strip().toLowerCase(), input.total());
+    public Pedido create(PedidoRequest input, String correoAutenticado) {
+        List<Item> items;
+        try {
+            items = input.lineas() == null ? null : objectMapper.readValue(input.lineas(), new TypeReference<List<Item>>() {});
+        } catch (JsonProcessingException ex) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Revisa los productos del pedido.");
+        }
+        if (items == null || items.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tu carrito está vacío.");
+        }
+
+        Resumen resumen = resumenService.prepararPedido(items, correoAutenticado);
+        if (resumen.lineas().size() != items.size() || resumen.total().compareTo(input.total()) != 0) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "El carrito cambió. Revisa el resumen antes de pagar.");
+        }
+
+        String correo = correoAutenticado == null ? input.correoCliente() : correoAutenticado;
+        Pedido pedido = new Pedido(input.numero().strip(), correo.strip().toLowerCase(Locale.ROOT), resumen.total());
         pedido.setFecha(input.fecha());
         pedido.setEnvio(input.envio());
         pedido.setMetodoPago(input.metodoPago());
         pedido.setCodigoAutorizacion(input.codigoAutorizacion());
-        pedido.setLineas(input.lineas());
-        pedido.setSubtotal(input.subtotal());
-        pedido.setDescuentoTortaDuoc(input.descuentoTortaDuoc());
-        pedido.setDescuentoEdad(input.descuentoEdad());
-        pedido.setDescuentoCodigo(input.descuentoCodigo());
-        pedido.setEstado(input.estado() == null || input.estado().isBlank() ? "pagado" : input.estado().strip());
-        Pedido saved = repository.save(pedido);
-
         try {
-            if (input.lineas() != null && !input.lineas().isBlank()) {
-                JsonNode node = objectMapper.readTree(input.lineas());
-                if (node.isArray()) {
-                    for (JsonNode l : node) {
-                        String codigo = l.has("codigo") ? l.get("codigo").asText() : null;
-                        int cantidad = l.has("cantidad") ? l.get("cantidad").asInt() : 0;
-                        if (codigo != null && cantidad > 0) {
-                            Producto p = productoRepository.findAll().stream()
-                                .filter(x -> codigo.equals(x.getCodigo()))
-                                .findFirst().orElse(null);
-                            if (p != null) {
-                                int nuevo = Math.max(0, p.getStock() - cantidad);
-                                p.setStock(nuevo);
-                                productoRepository.save(p);
-                            }
-                        }
-                    }
-                }
-            }
-        } catch (Exception ignored) {
+            pedido.setLineas(objectMapper.writeValueAsString(resumen.lineas()));
+        } catch (JsonProcessingException ex) {
+            throw new IllegalStateException("No se pudieron guardar los productos del pedido.", ex);
         }
-        return saved;
+        pedido.setSubtotal(resumen.subtotal());
+        pedido.setDescuentoOferta(resumen.descuentoOferta());
+        pedido.setDescuentoTortaDuoc(resumen.descuentoTortaDuoc());
+        pedido.setDescuentoEdad(resumen.descuentoEdad());
+        pedido.setDescuentoCodigo(resumen.descuentoCodigo());
+        pedido.setEstado(input.estado() == null || input.estado().isBlank() ? "pagado" : input.estado().strip());
+
+        return repository.save(pedido);
     }
 
     @Transactional

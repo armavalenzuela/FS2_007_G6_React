@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { useSesion } from "../context/SesionContext.jsx";
 import { useAuth } from "../context/AuthContext.jsx";
 import { usuarioService } from "../services/usuarioService.js";
-import { califica50, esCorreoDuoc, CODIGO_FELICES50 } from "../data/reglasNegocio.js";
+import { califica50, esCorreoDuoc } from "../data/reglasNegocio.js";
+import { getErrorMessage } from "../utils/getErrorMessage.js";
 import Alerta from "../components/Alerta.jsx";
 
 function Estado({ activo, textoActivo, textoInactivo }) {
@@ -14,11 +14,10 @@ function Estado({ activo, textoActivo, textoInactivo }) {
 }
 
 export default function MiCuenta() {
-  const { usuario: sesionUsuario, actualizarPerfil } = useSesion();
   const { usuario: authUsuario } = useAuth();
-  const correoAuth = authUsuario?.correo || sesionUsuario?.correo || null;
-
-  const [usuario, setUsuario] = useState(sesionUsuario || null);
+  const correo = authUsuario?.correo;
+  const [usuario, setUsuario] = useState(null);
+  const [error, setError] = useState("");
   const [datos, setDatos] = useState({ nombre: "", correo: "", fechaNacimiento: "", telefono: "" });
   const [codigo, setCodigo] = useState("");
   const [mensajeCodigo, setMensajeCodigo] = useState(null);
@@ -26,38 +25,22 @@ export default function MiCuenta() {
 
   useEffect(() => {
     let activo = true;
-    async function cargar() {
-      if (correoAuth) {
-        try {
-          const lista = await usuarioService.list();
-          const encontrado = lista.find((u) => u.correo === correoAuth);
-          if (activo && encontrado) {
-            setUsuario(encontrado);
-            setDatos({
-              nombre: encontrado.nombre,
-              correo: encontrado.correo,
-              fechaNacimiento: encontrado.fechaNacimiento || "",
-              telefono: encontrado.telefono || "",
-            });
-            return;
-          }
-        } catch (e) { /* fallback */ }
-      }
-      if (activo && sesionUsuario) {
-        setUsuario(sesionUsuario);
+    setUsuario(null);
+    setError("");
+    usuarioService.perfil()
+      .then((perfil) => {
+        if (!activo) return;
+        setUsuario(perfil);
         setDatos({
-          nombre: sesionUsuario.nombre,
-          correo: sesionUsuario.correo,
-          fechaNacimiento: sesionUsuario.fechaNacimiento || "",
-          telefono: sesionUsuario.telefono || "",
+          nombre: perfil.nombre,
+          correo: perfil.correo,
+          fechaNacimiento: perfil.fechaNacimiento || "",
+          telefono: perfil.telefono || "",
         });
-      }
-    }
-    cargar();
+      })
+      .catch((err) => { if (activo) setError(getErrorMessage(err)); });
     return () => { activo = false; };
-  }, [correoAuth, sesionUsuario?.correo]);
-
-  if (!usuario && !correoAuth) return null;
+  }, [correo]);
 
   const tieneDescuentoEdad = califica50(usuario?.fechaNacimiento);
   const tieneTortaDuoc = esCorreoDuoc(usuario?.correo);
@@ -65,13 +48,8 @@ export default function MiCuenta() {
 
   async function guardar(e) {
     e.preventDefault();
-    if (!usuario?.id) {
-      actualizarPerfil(usuario.correo, { fechaNacimiento: datos.fechaNacimiento, telefono: datos.telefono });
-      setMensajePerfil({ tipo: "success", texto: "Cambios guardados." });
-      return;
-    }
     try {
-      const actualizado = await usuarioService.update(usuario.id, { ...usuario, fechaNacimiento: datos.fechaNacimiento, telefono: datos.telefono });
+      const actualizado = await usuarioService.actualizarPerfil({ fechaNacimiento: datos.fechaNacimiento, telefono: datos.telefono });
       setUsuario(actualizado);
       setMensajePerfil({ tipo: "success", texto: "Cambios guardados." });
     } catch (err) {
@@ -80,26 +58,21 @@ export default function MiCuenta() {
   }
 
   async function aplicarCodigo() {
-    if (codigo.trim().toUpperCase() !== CODIGO_FELICES50) {
-      setMensajeCodigo({ tipo: "danger", texto: "El código ingresado no es válido." });
-      return;
-    }
-    if (!usuario?.id) {
-      actualizarPerfil(usuario.correo, { codigoFelices50Aplicado: true });
-      setCodigo("");
-      setMensajeCodigo({ tipo: "success", texto: "¡Código aplicado con éxito!" });
+    if (!codigo.trim()) {
+      setMensajeCodigo({ tipo: "danger", texto: "Ingresa un código promocional." });
       return;
     }
     try {
-      const actualizado = await usuarioService.update(usuario.id, { ...usuario, codigoFelices50Aplicado: true });
+      const actualizado = await usuarioService.actualizarPerfil({ codigoPromocional: codigo });
       setUsuario(actualizado);
       setCodigo("");
       setMensajeCodigo({ tipo: "success", texto: "¡Código aplicado con éxito!" });
     } catch (err) {
-      setMensajeCodigo({ tipo: "danger", texto: "No se pudo aplicar el código." });
+      setMensajeCodigo({ tipo: "danger", texto: getErrorMessage(err) });
     }
   }
 
+  if (error) return <section className="container py-5"><Alerta tipo="danger">{error}</Alerta></section>;
   if (!usuario) return <section className="seccion text-center"><div className="container"><p>Cargando cuenta...</p></div></section>;
 
   return (
@@ -148,10 +121,6 @@ export default function MiCuenta() {
                   <li className="mb-2 d-flex justify-content-between align-items-start gap-2">
                     <span>🎂 <strong>Descuento 50%</strong> para socios de 50 años o más.</span>
                     <Estado activo={tieneDescuentoEdad} textoActivo="Activo" textoInactivo="No aplica" />
-                  </li>
-                  <li className="mb-2 d-flex justify-content-between align-items-start gap-2">
-                    <span>🎓 <strong>Torta de cumpleaños gratis</strong> para registros con correo Duoc.</span>
-                    <Estado activo={tieneTortaDuoc} textoActivo="Activo" textoInactivo="No aplica" />
                   </li>
                   <li className="mb-0 d-flex justify-content-between align-items-start gap-2">
                     <span>🎟️ <strong>Código FELICES50</strong> — 10% de descuento de por vida.</span>

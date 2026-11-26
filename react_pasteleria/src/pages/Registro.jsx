@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
 import { usuarioService } from "../services/usuarioService.js";
 import { validarRegistro } from "../utils/validaciones.js";
-import { CODIGO_FELICES50 } from "../data/reglasNegocio.js";
+import { getErrorMessage } from "../utils/getErrorMessage.js";
 
 const VACIO = { nombre: "", correo: "", fechaNacimiento: "", contrasena: "", confirmacion: "", codigoPromocional: "", terminos: false };
 
@@ -22,18 +22,7 @@ export default function Registro() {
   async function enviar(e) {
     e.preventDefault();
     setErrorGeneral("");
-    const codigo = form.codigoPromocional.trim().toUpperCase();
-    let existente = false;
-    try {
-      const lista = await usuarioService.list();
-      existente = lista.some((u) => u.correo === form.correo.trim().toLowerCase());
-    } catch (err) {
-      existente = false;
-    }
-    const nuevosErrores = validarRegistro(form, () => existente);
-    if (codigo && codigo !== CODIGO_FELICES50) {
-      nuevosErrores.codigoPromocional = "El código ingresado no es válido.";
-    }
+    const nuevosErrores = validarRegistro(form, () => false);
     setErrores(nuevosErrores);
     if (Object.keys(nuevosErrores).length > 0) return;
 
@@ -45,12 +34,12 @@ export default function Registro() {
         tipo: "cliente",
         fechaNacimiento: form.fechaNacimiento,
         telefono: "",
-        codigoFelices50Aplicado: codigo === CODIGO_FELICES50,
+        codigoPromocional: form.codigoPromocional,
       });
       await loginAuth(form.correo.trim().toLowerCase(), form.contrasena);
       navegar("/mi-cuenta");
     } catch (error) {
-      setErrorGeneral(error.message || "No se pudo crear la cuenta.");
+      setErrorGeneral(getErrorMessage(error));
     }
   }
 
@@ -73,7 +62,6 @@ export default function Registro() {
                 <div className="p-3 rounded-4 mb-4" style={{ background: "#fffaf1", border: "1px solid var(--color-borde)" }}>
                   <p className="small mb-1"><strong>🎂 Descuento 50%:</strong> automático para socios de 50 años o más.</p>
                   <p className="small mb-1"><strong>🎟️ Código FELICES50:</strong> 10% de descuento de por vida.</p>
-                  <p className="small mb-0"><strong>🎓 Correo institucional Duoc:</strong> torta de cumpleaños gratis.</p>
                 </div>
 
                 {errorGeneral && <div className="alert alert-danger small py-2">{errorGeneral}</div>}

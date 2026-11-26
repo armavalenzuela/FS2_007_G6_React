@@ -11,5 +11,5 @@ public record UsuarioRequest(
     String tipo,
     String fechaNacimiento,
     String telefono,
-    Boolean codigoFelices50Aplicado
+    String codigoPromocional
 ) {}

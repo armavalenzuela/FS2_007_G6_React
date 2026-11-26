@@ -5,20 +5,17 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "./styles/style.css";
 import "./styles/admin.css";
 import App from "./App.jsx";
-import { SesionProvider } from "./context/SesionContext.jsx";
 import { CarritoProvider } from "./context/CarritoContext.jsx";
 import { AuthProvider } from "./context/AuthContext.jsx";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <BrowserRouter>
-      <SesionProvider>
-        <AuthProvider>
-          <CarritoProvider>
-            <App />
-          </CarritoProvider>
-        </AuthProvider>
-      </SesionProvider>
+      <AuthProvider>
+        <CarritoProvider>
+          <App />
+        </CarritoProvider>
+      </AuthProvider>
     </BrowserRouter>
   </StrictMode>
 );

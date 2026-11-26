@@ -2,7 +2,7 @@ package cl.duoc.pasteleria.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
 import java.math.BigDecimal;
 
 public record PedidoRequest(
@@ -17,6 +17,6 @@ public record PedidoRequest(
     BigDecimal descuentoTortaDuoc,
     BigDecimal descuentoEdad,
     BigDecimal descuentoCodigo,
-    @NotNull(message = "Completa el total") @Positive(message = "El total debe ser mayor a cero") BigDecimal total,
+    @NotNull(message = "Completa el total") @PositiveOrZero(message = "El total no puede ser negativo") BigDecimal total,
     String estado
 ) {}

@@ -1,4 +1,5 @@
 INSERT IGNORE INTO usuario (correo, nombre, contrasena, tipo) VALUES ('admin@duoc.cl','Admin','admin123','ADMIN');
+UPDATE usuario SET tipo = 'ADMIN' WHERE correo = 'admin@duoc.cl' AND tipo <> 'ADMIN';
 INSERT IGNORE INTO usuario (correo, nombre, contrasena, tipo) VALUES ('vendedor@duoc.cl','Vendedor','vendedor1','VENDEDOR');
 INSERT IGNORE INTO usuario (correo, nombre, contrasena, tipo) VALUES ('cliente@duoc.cl','Cliente','cliente123','CLIENTE');
 

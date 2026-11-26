@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { pedidoService } from "../../services/pedidoService.js";
 import { formatoPesos } from "../../utils/formato.js";
 import { getErrorMessage } from "../../utils/getErrorMessage.js";
@@ -83,13 +83,11 @@ export function HistorialUsuario() {
 
   useEffect(() => {
     let activo = true;
-    pedidoService.list()
+    setCargando(true);
+    setError("");
+    pedidoService.historial(correo)
       .then((lista) => {
-        if (!activo) return;
-        const filtrados = lista
-          .map(normalizarPedido)
-          .filter((p) => p.correoCliente === correo?.trim().toLowerCase());
-        setPedidos(filtrados);
+        if (activo) setPedidos(lista.map(normalizarPedido));
       })
       .catch((e) => { if (activo) setError(getErrorMessage(e)); })
       .finally(() => { if (activo) setCargando(false); });

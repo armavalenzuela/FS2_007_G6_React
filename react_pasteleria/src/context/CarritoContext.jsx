@@ -18,9 +18,10 @@ export function CarritoProvider({ children }) {
       try {
         const data = await carritoService.get();
         if (!activo) return;
-        let parsed = [];
-        try { parsed = JSON.parse(data); } catch (e) { parsed = []; }
-        if (Array.isArray(parsed)) setItems(parsed.filter((i) => i && Number.isInteger(i.cantidad) && i.cantidad > 0));
+        const guardados = typeof data === "string" ? JSON.parse(data) : data;
+        if (Array.isArray(guardados)) {
+          setItems(guardados.filter((i) => i && typeof i.codigo === "string" && Number.isInteger(i.cantidad) && i.cantidad > 0));
+        }
       } catch (e) {
       }
     }

@@ -81,6 +81,7 @@ export default function AdminProductoForm() {
       categoria: form.categoria,
       precio: Number(form.precio),
       stock: Number(form.stock),
+      stockCritico: form.stockCritico === "" ? 0 : Number(form.stockCritico),
       enOferta: form.enOferta,
       descuentoOferta: form.enOferta ? Number(form.descuentoOferta) : 0,
       imagen: FORMATO_IMAGEN(codigoFinal),
