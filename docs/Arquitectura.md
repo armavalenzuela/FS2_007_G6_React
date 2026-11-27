@@ -14,6 +14,7 @@ Aplicación web full-stack de tienda online de pastelería. Consta de un fronten
 ### Backend
 ```bash
 cd pasteleria-api
+$env:DB_PASSWORD='tu_contraseña_exacta'
 mvn spring-boot:run
 ```
 Requiere JDK 21, Maven y MySQL 8.x corriendo (base `pasteleria` creada). Maven agregado al PATH de usuario. Endpoints base: `http://localhost:8080/api/v1`.
